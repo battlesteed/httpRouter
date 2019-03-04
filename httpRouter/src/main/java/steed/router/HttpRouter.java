@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -19,7 +20,7 @@ import org.springframework.core.type.filter.AnnotationTypeFilter;
 import steed.router.annotation.Path;
 import steed.router.annotation.Power;
 import steed.router.processor.BaseProcessor;
-import steed.util.base.PathUtil;
+import steed.util.base.StringUtil;
 import steed.util.logging.Logger;
 import steed.util.logging.LoggerFactory;
 import steed.util.reflect.ReflectResult;
@@ -31,13 +32,28 @@ import steed.util.reflect.ReflectUtil;
  * @author 战马 battle_steed@qq.com
  * 
  */  
-public class HttpRouter{
+public abstract class HttpRouter{
+	public final static String steed_forward = "steed_forward";
+	
 	private static final String jspPath = "/WEB-INF/jsp/";
 	
     private static Map<String, Class<? extends BaseProcessor>> pathProcessor = new HashMap<>();
     private static Logger logger = LoggerFactory.getLogger(HttpRouter.class);
     
-    static {
+    private static final ThreadLocal<HttpServletRequest> requestThreadLocal = new ThreadLocal<HttpServletRequest>();
+    private static final ThreadLocal<HttpServletResponse> responseThreadLocal = new ThreadLocal<HttpServletResponse>();
+	
+	public static HttpServletRequest getRequest(){
+		return requestThreadLocal.get();
+	}
+	public static HttpServletResponse getResponse(){
+		return responseThreadLocal.get();
+	}
+    public static Map<String, Class<? extends BaseProcessor>> getPathProcessor() {
+		return pathProcessor;
+	}
+
+	static {
     	scanProcessor();
     }
   
@@ -47,30 +63,76 @@ public class HttpRouter{
      * @param power Processor上面的power注解,若没有注解,则该参数为null
      * @return 是否有权限访问该uri
      */
-    protected boolean checkPower(HttpServletRequest request,HttpServletResponse response,String uri,String power) {
-    	return true;
-    }
+    protected abstract boolean checkPower(HttpServletRequest request,HttpServletResponse response,String uri,String power);
     
     /**
-     *  把http请求中的参数填充到Processor
+     * java对象转json,用于给客户端返回json数据
+     * @param object 要转换的json对象
+     * @return json字符串
+     */
+    protected abstract String object2Json(Object object);
+
+	/**
+	 * 把对象以json形式写到response的输出流，一般用于ajax
+	 * @param obj 要输出的对象
+	 * @throws IOException 
+	 */
+	protected void writeJsonMessage(Object obj,HttpServletResponse response) throws IOException{
+		if (obj == null) {
+			return;
+		}
+		response.setHeader("Content-Type", "application/json");
+		String json = object2Json(obj);
+		logger.debug("返回json----->"+json);
+		writeString(json,response);
+	}
+	
+	/**
+	 * 把string写到response的输出流
+	 * @param string
+	 * @throws IOException 
+	 */
+	protected void writeString(String string,HttpServletResponse response) throws IOException{
+		ServletOutputStream out = response.getOutputStream();
+		out.write(StringUtil.getSystemCharacterSetBytes(string));
+		out.flush();
+	}
+    
+    
+    /**
+     *   把http请求中的参数填充到Processor
      */
     protected void fillParamters2ProcessorData(BaseProcessor processor,HttpServletRequest request,HttpServletResponse response) {
-		Enumeration<String> parameterNames = request.getParameterNames();
-		Class<? extends BaseProcessor> class1 = processor.getClass();
-		Object model = null;
+    	Class<? extends BaseProcessor> class1 = processor.getClass();
+		/*Object model = null;
 		if (processor instanceof ModelDriven<?>) {
 			model = ((ModelDriven<?>) processor).getModel();
-		}
+		}*/
+    	Enumeration<String> parameterNames = request.getParameterNames();
 		while (parameterNames.hasMoreElements()) {
 			String string = (String) parameterNames.nextElement();
 			ReflectResult chainField = ReflectUtil.getChainField(class1, string);
-			if (chainField == null && model != null) {
-				chainField = ReflectUtil.getChainField(model.getClass(), string);
+			if (chainField != null) {
 			}
 		}
 	}
   
-    public void forward(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException{  
+    public void forward(HttpServletRequest request, HttpServletResponse response){  
+    	try {
+			requestThreadLocal.set(request);
+			responseThreadLocal.set(response);
+			try {
+				forwardNow(request, response);
+			} catch (IOException | ServletException e) {
+				logger.error("httpRouter分发请求出错!",e);
+			}
+		}finally {
+			requestThreadLocal.remove();
+			responseThreadLocal.remove();
+		}
+    }
+    
+    private void forwardNow(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException{  
 		String requestURI = request.getRequestURI();
 		String parentPath = requestURI.substring(0,requestURI.lastIndexOf("/")+1);
 		Class<? extends BaseProcessor> processor = pathProcessor.get(parentPath);
@@ -79,23 +141,24 @@ public class HttpRouter{
 			response.sendError(404);
 			return;
 		}
-		if (!checkPower(request, response, requestURI, getPower(processor.getAnnotation(Power.class)))) {
-			return;
-		}
 		
 		String methodName = getMethodName(requestURI);
 		try {
 			Method method = processor.getMethod(methodName);
-			Class<?> returnType = method.getReturnType();
+			/*Class<?> returnType = method.getReturnType();
 			if (returnType != String.class && returnType != Void.TYPE) {
 				logger.warn("在%s中的 %s 方法返回值不为void或string,不能通过http访问!",processor.getName(),methodName);
 				response.sendError(404);
 				return;
-			}
+			}*/
 			
 			Power annotation = method.getAnnotation(Power.class);
-			//若annotation为null则需要根据uri判断是否拥有权限,而上面的类权限已经用相同uri判断一次了,这里不重复判断
-			if (annotation != null && !checkPower(request, response, requestURI,annotation.value())) {
+			//只进行一次权限判断,方法有power则只判断方法的权限,类权限不判断
+			if (annotation != null) {
+				if (checkPower(request, response, requestURI,annotation.value())) {
+					return;
+				}
+			}else if (!checkPower(request, response, requestURI, getPower(processor.getAnnotation(Power.class)))) {
 				return;
 			}
 			
@@ -103,13 +166,17 @@ public class HttpRouter{
 				BaseProcessor newInstance = processor.newInstance();
 				fillParamters2ProcessorData(newInstance, request, response);
 				Object invoke = method.invoke(newInstance);
-				if (invoke != null && invoke instanceof String) {
-					String jsp = (String) invoke;
-					if (BaseProcessor.steed_forward.equals(invoke)) {
-						jsp = mergePath(jspPath, parentPath+methodName+".jsp");
+				if (invoke != null) {
+					if (invoke instanceof String) {
+						String jsp = (String) invoke;
+						if (steed_forward.equals(invoke)) {
+							jsp = mergePath(jspPath, parentPath+methodName+".jsp");
+						}
+						logger.debug("forward到%s",jsp);
+						request.getRequestDispatcher(jsp).forward(request, response);;
+					}else {
+						writeJsonMessage(invoke, response);
 					}
-					logger.debug("forward到%s",jsp);
-					request.getRequestDispatcher(jsp).forward(request, response);;
 				}
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
 					| InstantiationException e) {
@@ -155,6 +222,9 @@ public class HttpRouter{
 		String method = requestURI.substring(requestURI.lastIndexOf("/")+1,requestURI.length());
     	if (method.contains(".")) {
 			method = method.substring(0,method.indexOf("."));
+		}
+    	if ("".equals(method)) {
+			return "index";
 		}
 		return method;
 	}

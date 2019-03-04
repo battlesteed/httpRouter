@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- For assistance related to logback-translator or configuration -->
+<!-- files in general, please contact the logback user mailing list -->
+<!-- at http://www.qos.ch/mailman/listinfo/logback-user -->
+<!-- -->
+<!-- For professional support please see -->
+<!-- http://www.qos.ch/shop/products/professionalSupport -->
+<!-- -->
+<configuration>
+	 <springProperty scope="context" name="log_path" source="loggingPath"/>
+	<!-- <property name="log_path" value="${loggingPath}" /> -->
+	<appender name="stdout"
+		class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
+			</pattern>
+		</encoder>
+	</appender>
+	<appender name="R"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<File>${log_path}/steedBoot</File>
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
+			</pattern>
+		</encoder>
+		<rollingPolicy
+			class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${log_path}/steedBoot.%d{yyyy-MM-dd-HH'.log'}
+			</fileNamePattern>
+		</rollingPolicy>
+	</appender>
+	<appender name="info"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<File>${log_path}/steedBoot-info</File>
+		<append>true</append>
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
+			</pattern>
+		</encoder>
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>INFO</level>
+		</filter>
+		<rollingPolicy
+			class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${log_path}/steedBoot-info.%d{yyyy-MM-dd-HH'.log'}</fileNamePattern>
+		</rollingPolicy>
+	</appender>
+	<appender name="debug"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<append>true</append>
+		<File>${log_path}/steedBoot-debug</File>
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+		</encoder>
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>DEBUG</level>
+		</filter>
+		<rollingPolicy
+			class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${log_path}/steedBoot-debug.%d{yyyy-MM-dd-HH'.log'}</fileNamePattern>
+		</rollingPolicy>
+	</appender>
+	<appender name="warn"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<File>${log_path}/steedBoot-warn</File>
+		<append>true</append>
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+		</encoder>
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>WARN</level>
+		</filter>
+		<rollingPolicy
+			class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${log_path}/steedBoot-warn.%d{yyyy-MM-dd-HH'.log'}</fileNamePattern>
+		</rollingPolicy>
+	</appender>
+	<appender name="error"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<append>true</append>
+		<File>${log_path}/steedBoot-error</File>
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+		</encoder>
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>ERROR</level>
+		</filter>
+		<rollingPolicy
+			class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${log_path}/steedBoot-error.%d{yyyy-MM-dd-HH'.log'}</fileNamePattern>
+		</rollingPolicy>
+	</appender>
+	<logger name="org.hibernate.hql.internal" level="WARN" />
+	<logger name="info" level="info" />
+	<logger name="steed" level="DEBUG" />
+	<logger name="debug" level="debug" />
+	<logger name="error" level="error" />
+	<logger name="warn" level="warn" />
+	<root level="INFO">
+		<appender-ref ref="stdout" />
+		<appender-ref ref="R" />
+		<appender-ref ref="info" />
+		<appender-ref ref="debug" />
+		<appender-ref ref="warn" />
+		<appender-ref ref="error" />
+	</root>
+</configuration>
