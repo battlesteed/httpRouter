@@ -11,21 +11,17 @@ import javax.servlet.http.HttpFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import steed.router.HttpRouter;
 import steed.router.SimpleHttpRouter;
-import steed.util.base.BaseUtil;
+import steed.util.logging.LoggerFactory;
 
 @WebFilter(urlPatterns="/*")
 public class TestFilter extends HttpFilter{
-	public static final HttpRouter httpRouter = new SimpleHttpRouter() {
-
-		@Override
-		protected boolean checkPower(HttpServletRequest request, HttpServletResponse response, String uri,
-				String power) {
-			BaseUtil.getLogger().debug("检测权限%s,uri:%s",power,uri);
-			return super.checkPower(request, response, uri, power);
-		}
-	};
+	
+	@Autowired
+	public HttpRouter httpRouter;
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)

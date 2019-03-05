@@ -2,13 +2,12 @@ package steed.router.test;
 
 import org.junit.Test;
 
-import steed.util.base.BaseUtil;
 import steed.util.logging.LoggerFactory;
 
 public class SimpleTest {
 	private int i = 0;
 	private ThreadLocal<Integer> threadLocal = new ThreadLocal<>();	
-	@Test
+//	@Test
 	public void testLogBack() {
 		LoggerFactory.getLogger().warn("gfsdgfdsg");
 	}

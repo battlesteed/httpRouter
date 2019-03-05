@@ -20,7 +20,6 @@ import org.springframework.core.type.filter.AnnotationTypeFilter;
 import steed.router.annotation.Path;
 import steed.router.annotation.Power;
 import steed.router.processor.BaseProcessor;
-import steed.util.base.StringUtil;
 import steed.util.logging.Logger;
 import steed.util.logging.LoggerFactory;
 import steed.util.reflect.ReflectResult;
@@ -34,9 +33,11 @@ import steed.util.reflect.ReflectUtil;
  */  
 public abstract class HttpRouter{
 	public final static String steed_forward = "steed_forward";
+	public static String charset = "UTF-8";
 	
 	private static final String jspPath = "/WEB-INF/jsp/";
 	
+	public final static ParamterFiller paramterFiller = new ParamterFiller();
     private static Map<String, Class<? extends BaseProcessor>> pathProcessor = new HashMap<>();
     private static Logger logger = LoggerFactory.getLogger(HttpRouter.class);
     
@@ -94,7 +95,7 @@ public abstract class HttpRouter{
 	 */
 	protected void writeString(String string,HttpServletResponse response) throws IOException{
 		ServletOutputStream out = response.getOutputStream();
-		out.write(StringUtil.getSystemCharacterSetBytes(string));
+		out.write(string.getBytes(charset));
 		out.flush();
 	}
     
@@ -103,18 +104,7 @@ public abstract class HttpRouter{
      *   把http请求中的参数填充到Processor
      */
     protected void fillParamters2ProcessorData(BaseProcessor processor,HttpServletRequest request,HttpServletResponse response) {
-    	Class<? extends BaseProcessor> class1 = processor.getClass();
-		/*Object model = null;
-		if (processor instanceof ModelDriven<?>) {
-			model = ((ModelDriven<?>) processor).getModel();
-		}*/
-    	Enumeration<String> parameterNames = request.getParameterNames();
-		while (parameterNames.hasMoreElements()) {
-			String string = (String) parameterNames.nextElement();
-			ReflectResult chainField = ReflectUtil.getChainField(class1, string);
-			if (chainField != null) {
-			}
-		}
+    	paramterFiller.fillParamters2ProcessorData(processor, request, response);
 	}
   
     public void forward(HttpServletRequest request, HttpServletResponse response){  
@@ -172,8 +162,12 @@ public abstract class HttpRouter{
 						if (steed_forward.equals(invoke)) {
 							jsp = mergePath(jspPath, parentPath+methodName+".jsp");
 						}
-						logger.debug("forward到%s",jsp);
-						request.getRequestDispatcher(jsp).forward(request, response);;
+						if (jsp.endsWith(".jsp")) {
+							logger.debug("forward到%s",jsp);
+							request.getRequestDispatcher(jsp).forward(request, response);;
+						}else {
+							writeString(jsp, response);
+						}
 					}else {
 						writeJsonMessage(invoke, response);
 					}
@@ -234,8 +228,8 @@ public abstract class HttpRouter{
 		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(false);
 		provider.addIncludeFilter(new AnnotationTypeFilter(Path.class));
 //		provider.addIncludeFilter(new AssignableTypeFilter(Processor.class));
-//		provider.setResourcePattern("*.class");
-		Set<BeanDefinition> findCandidateComponents = provider.findCandidateComponents("");
+//		provider.setResourcePattern("**/*.class");
+		Set<BeanDefinition> findCandidateComponents = provider.findCandidateComponents("steed");
 		for (BeanDefinition temp:findCandidateComponents) {
 			try {
 				Class<? extends BaseProcessor> forName = (Class<? extends BaseProcessor>) Class.forName(temp.getBeanClassName());
