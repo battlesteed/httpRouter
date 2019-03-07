@@ -1,11 +1,13 @@
 package steed.router.test;
 
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Random;
 import java.util.Map.Entry;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,8 @@ import org.springframework.util.MultiValueMap;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import steed.util.base.StringUtil;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 //@Configuration
@@ -38,12 +42,14 @@ public class ParamterFillerTest {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
-		params.add("param1", new Random().nextInt()+"");
+		params.add("param1", new Random().nextInt(10000)+"");
+		params.add("param2", "true");
+		params.add("param3", new Random().nextLong()+"");
 		
-		String httpRestClient = httpRestClient("/test/baseTypeParamTest", HttpMethod.GET, params);
-		Map<String, Object> fromJson = new Gson().fromJson(httpRestClient, new TypeToken<Map<String, Object>>(){}.getType());
-		for (Entry<String, Object> e:fromJson.entrySet()) {
-			e.getValue().toString().equals(params.getFirst(e.getKey()));
+		String httpRestClient = httpRestClient("/test/baseTypeParamTest", HttpMethod.POST, params);
+		Map<String, String> fromJson = new Gson().fromJson(httpRestClient, new TypeToken<Map<String, String>>(){}.getType());
+		for (Entry<String, String> e:fromJson.entrySet()) {
+			Assert.assertTrue(e.getValue().equals(params.getFirst(e.getKey())));
 		}
 	}
 	

@@ -1,6 +1,7 @@
 package steed.router.exception;
 
 public class RouterException extends RuntimeException{
+	private static final long serialVersionUID = 1L;
 
 	public RouterException() {
 		super();

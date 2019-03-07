@@ -3,7 +3,6 @@ package steed.router;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -22,8 +21,6 @@ import steed.router.annotation.Power;
 import steed.router.processor.BaseProcessor;
 import steed.util.logging.Logger;
 import steed.util.logging.LoggerFactory;
-import steed.util.reflect.ReflectResult;
-import steed.util.reflect.ReflectUtil;
 
 
 /** 
@@ -105,6 +102,12 @@ public abstract class HttpRouter{
      */
     protected void fillParamters2ProcessorData(BaseProcessor processor,HttpServletRequest request,HttpServletResponse response) {
     	paramterFiller.fillParamters2ProcessorData(processor, request, response);
+    	if (processor instanceof ModelDriven<?>) {
+			Object model = ((ModelDriven<?>) processor).getModel();
+			if (model != null) {
+				paramterFiller.fillParamters2ProcessorData(model, request, response);
+			}
+		}
 	}
   
     public void forward(HttpServletRequest request, HttpServletResponse response){  
@@ -244,7 +247,7 @@ public abstract class HttpRouter{
 				logger.error("扫描Processor出错!",e);
 			}
 		}
-	}
+	} 
 	
 	private static String addSprit(String path) {
 		if (!path.startsWith("/")) {

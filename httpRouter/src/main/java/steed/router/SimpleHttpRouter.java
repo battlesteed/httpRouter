@@ -6,7 +6,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.google.gson.Gson;
 
 public class SimpleHttpRouter extends HttpRouter{
-	private static Gson gson = new Gson();
+	private Gson gson = new Gson();
 	
 	@Override
     protected boolean checkPower(HttpServletRequest request,HttpServletResponse response,String uri,String power) {

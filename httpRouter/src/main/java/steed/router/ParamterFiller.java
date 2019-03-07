@@ -68,8 +68,7 @@ public class ParamterFiller {
       *     把http请求中的参数填充到Processor
      *    
      */
-    protected void fillParamters2ProcessorData(BaseProcessor processor,HttpServletRequest request,HttpServletResponse response) {
-    	Class<? extends BaseProcessor> class1 = processor.getClass();
+    protected void fillParamters2ProcessorData(Object container,HttpServletRequest request,HttpServletResponse response) {
 		/*Object model = null;
 		if (processor instanceof ModelDriven<?>) {
 			model = ((ModelDriven<?>) processor).getModel();
@@ -80,26 +79,43 @@ public class ParamterFiller {
 			String parameterName = parameterNames.nextElement();
 			String[] split = parameterName.split("\\.");
 			Field field = null;
-			Class<?> target = processor.getClass();
-			Object container = processor;
-			for(String temp:split){
-				field = ReflectUtil.getField(target, temp, true);
+			Class<?> target = container.getClass();
+			for( int i = 0; i < split.length; i++){
+				field = ReflectUtil.getField(target, split[i], false);
 				if (field == null || !canAccess(field, target)) {
 					break;
 				}
-				container = getFieldValue(field, container, request, parameterName);
+				if (i == split.length-1) {
+					paramter2Field(field, container, request, parameterName);
+				}else {
+					container = getFieldValue(field, container, request, parameterName);
+				}
 			}
 		}
 	}
     
-    private Object paramter2Field(Field field,Object target,HttpServletRequest request,String parameterName) {
+    private void paramter2Field(Field field, Object container, HttpServletRequest request, String parameterName) {
+    	logger.debug("开始填充参数%s",parameterName);
+		Object convertParamter = convertParamter(field, container, request, parameterName);
+		field.setAccessible(true);
+		try {
+			field.set(container, convertParamter);
+		} catch (IllegalArgumentException | IllegalAccessException e) {
+			logger.error("转换参数"+parameterName+"出错",e);
+		}
+	}
+
+	private Object convertParamter(Field field,Object container,HttpServletRequest request,String parameterName) {
     	for (Class<?> temp:paramterConverterMap.keySet()) {
 			if (temp.isAssignableFrom(field.getType())) {
-				return paramterConverterMap.get(temp).convert(field, target, request, parameterName);
+				return paramterConverterMap.get(temp).convert(field, container, request, parameterName);
 			}
 		}
+    	if (field.getType() == String.class) {
+			return request.getParameter(parameterName);
+		}
     	if (ReflectUtil.isClassBaseType(field.getType())) {
-			return baseTypeConverter.convert(field, target, request, parameterName);
+			return baseTypeConverter.convert(field, container, request, parameterName);
 		}
     	logger.warn("未找到可以转换类%s的转换器,放弃转换该参数!",field.getType().getName());
     	return null;
