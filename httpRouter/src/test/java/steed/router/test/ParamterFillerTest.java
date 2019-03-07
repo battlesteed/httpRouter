@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.Map.Entry;
 
 import org.junit.Assert;
@@ -27,6 +28,8 @@ import org.springframework.util.MultiValueMap;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import steed.hibernatemaster.util.DaoUtil;
+import steed.router.test.processor.Student;
 import steed.util.base.StringUtil;
 
 @RunWith(SpringRunner.class)
@@ -45,11 +48,39 @@ public class ParamterFillerTest {
 		params.add("param1", new Random().nextInt(10000)+"");
 		params.add("param2", "true");
 		params.add("param3", new Random().nextLong()+"");
+		Student student = new Student();
+		student.setAddress("fdsafd");
+		student.setMan(false);
+		student.setName("afdsaf");
+		student.setNumber(49);
 		
 		String httpRestClient = httpRestClient("/test/baseTypeParamTest", HttpMethod.POST, params);
 		Map<String, String> fromJson = new Gson().fromJson(httpRestClient, new TypeToken<Map<String, String>>(){}.getType());
 		for (Entry<String, String> e:fromJson.entrySet()) {
 			Assert.assertTrue(e.getValue().equals(params.getFirst(e.getKey())));
+		}
+	}
+	
+	@Test
+	public void testModelDriven() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+		Student student = new Student();
+		student.setAddress("fdsafd");
+		student.setMan(true);
+		student.setName("afdsaf");
+		student.setNumber(49);
+		Set<Entry<String, Object>> entrySet = DaoUtil.putField2Map(student).entrySet();
+		for(Entry<String, Object> e:entrySet) {
+			params.add(e.getKey(), e.getValue()+"");
+		}
+		
+		String httpRestClient = httpRestClient("/test/modelDrivenTest", HttpMethod.POST, params);
+		Student s = new Gson().fromJson(httpRestClient, Student.class);
+		Map<String, Object> map = DaoUtil.putField2Map(s);
+		for (Entry<String, Object> e:entrySet) {
+			Assert.assertTrue(e.getValue().equals(map.get(e.getKey())));
 		}
 	}
 	

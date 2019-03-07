@@ -29,7 +29,7 @@ public class RouteTest {
 	private TestRestTemplate restTemplate;
 
 	@Test
-	public void test404() {
+	public void testRoute() {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 		ResponseEntity<String> entity = this.restTemplate.exchange("/"+new Random().nextInt(), HttpMethod.GET, new HttpEntity<Void>(headers),
@@ -41,5 +41,14 @@ public class RouteTest {
 		entity = this.restTemplate.exchange("/test/ad2", HttpMethod.GET, new HttpEntity<Void>(headers),
 				String.class);
 		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+		entity = this.restTemplate.exchange("/test/getModel", HttpMethod.GET, new HttpEntity<Void>(headers),
+				String.class);
+		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+		entity = this.restTemplate.exchange("/test/testDontAccess", HttpMethod.GET, new HttpEntity<Void>(headers),
+				String.class);
+		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+		entity = this.restTemplate.exchange("/test/testStatic", HttpMethod.GET, new HttpEntity<Void>(headers),
+				String.class);
+		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
 	}
 }

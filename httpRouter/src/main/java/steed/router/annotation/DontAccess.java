@@ -7,15 +7,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 权限注解，表明该Processor或方法需要什么权限
- * @author 战马
- *        battle_steed@qq.com
+ * 禁止访问注解，表明该Processor或方法不允许通过http访问
+ * @author 战马 battle_steed@qq.com
  */
 @Inherited
-@Target({ElementType.METHOD,ElementType.TYPE})
+@Target({ElementType.METHOD,ElementType.TYPE,ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Power {
-	public static String logined = "logined";
-	public String value();
-	public int level() default 1;
+public @interface DontAccess {
 }

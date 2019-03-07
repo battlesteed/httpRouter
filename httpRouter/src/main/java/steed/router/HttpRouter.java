@@ -3,6 +3,7 @@ package steed.router;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 
+import steed.router.annotation.DontAccess;
 import steed.router.annotation.Path;
 import steed.router.annotation.Power;
 import steed.router.processor.BaseProcessor;
@@ -100,12 +102,14 @@ public abstract class HttpRouter{
     /**
      *   把http请求中的参数填充到Processor
      */
-    protected void fillParamters2ProcessorData(BaseProcessor processor,HttpServletRequest request,HttpServletResponse response) {
+    @SuppressWarnings("unchecked")
+	protected void fillParamters2ProcessorData(BaseProcessor processor,HttpServletRequest request,HttpServletResponse response) {
     	paramterFiller.fillParamters2ProcessorData(processor, request, response);
     	if (processor instanceof ModelDriven<?>) {
 			Object model = ((ModelDriven<?>) processor).getModel();
 			if (model != null) {
 				paramterFiller.fillParamters2ProcessorData(model, request, response);
+				((ModelDriven<Object>) processor).onModelReady(model);
 			}
 		}
 	}
@@ -127,23 +131,24 @@ public abstract class HttpRouter{
     
     private void forwardNow(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException{  
 		String requestURI = request.getRequestURI();
-		String parentPath = requestURI.substring(0,requestURI.lastIndexOf("/")+1);
-		Class<? extends BaseProcessor> processor = pathProcessor.get(parentPath);
+		String parentPath = getParentPath(requestURI);
+		Class<? extends BaseProcessor> processor = getProcessor(response, parentPath);
+		
 		if (processor == null) {
-			logger.warn("未找到path为 %s 的Processor!",parentPath);
-			response.sendError(404);
 			return;
 		}
 		
 		String methodName = getMethodName(requestURI);
+		
 		try {
 			Method method = processor.getMethod(methodName);
-			/*Class<?> returnType = method.getReturnType();
-			if (returnType != String.class && returnType != Void.TYPE) {
-				logger.warn("在%s中的 %s 方法返回值不为void或string,不能通过http访问!",processor.getName(),methodName);
-				response.sendError(404);
+			if (methodName.startsWith("set") || methodName.startsWith("get") 
+					|| method.getAnnotation(DontAccess.class) != null
+					|| Modifier.isStatic(method.getModifiers())) {
+				logger.error("方法%s包含DontAccess注解或方法名以get,set开头或为静态方法,不能通过http访问!",method.toString());
+				response.sendError(403);
 				return;
-			}*/
+			}
 			
 			Power annotation = method.getAnnotation(Power.class);
 			//只进行一次权限判断,方法有power则只判断方法的权限,类权限不判断
@@ -158,7 +163,11 @@ public abstract class HttpRouter{
 			try {
 				BaseProcessor newInstance = processor.newInstance();
 				fillParamters2ProcessorData(newInstance, request, response);
+				
+				newInstance.beforeAction(methodName);
 				Object invoke = method.invoke(newInstance);
+				newInstance.afterAction(methodName);
+				
 				if (invoke != null) {
 					if (invoke instanceof String) {
 						String jsp = (String) invoke;
@@ -187,6 +196,23 @@ public abstract class HttpRouter{
 			return;
 		}
     }
+	private Class<? extends BaseProcessor> getProcessor(HttpServletResponse response, String parentPath) throws IOException {
+		Class<? extends BaseProcessor> processor = pathProcessor.get(parentPath);
+		if (processor == null) {
+			logger.warn("未找到path为 %s 的Processor!", parentPath);
+			response.sendError(404);
+			return null;
+		}
+		if (processor.getAnnotation(DontAccess.class) != null) {
+			logger.error("类%s包含DontAccess注解,不能通过http访问!",processor.getName());
+			response.sendError(403);
+			return null;
+		}
+		return processor;
+	}
+	private String getParentPath(String requestURI) {
+		return requestURI.substring(0,requestURI.lastIndexOf("/")+1);
+	}
     
     /**
 	 * 合并路径,防止出现双斜杠或者没有斜杠

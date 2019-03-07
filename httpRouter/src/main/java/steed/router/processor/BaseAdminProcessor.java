@@ -47,10 +47,6 @@ public class BaseAdminProcessor<SteedDomain extends BaseDatabaseDomain> extends 
 	 */
 	protected int pageSize = defaultPageSize;
 	
-	public int getCurrentPage() {
-		return currentPage;
-	}
-	
 	public void setCurrentPage(int currentPage) {
 		this.currentPage = currentPage;
 	}
@@ -83,6 +79,7 @@ public class BaseAdminProcessor<SteedDomain extends BaseDatabaseDomain> extends 
 	protected boolean isRequestParameterEmpty(String key){
 		return StringUtil.isStringEmpty(getRequest().getParameter(key));
 	}
+	
 	protected String[] getRequestParameters(String key){
 		return getRequest().getParameterValues(key);
 	}
@@ -95,21 +92,19 @@ public class BaseAdminProcessor<SteedDomain extends BaseDatabaseDomain> extends 
 		getSession().setAttribute(key, obj);
 	}
 	
-	public ServletContext getServletContext() {
+	protected ServletContext getServletContext() {
 		//艹，兼容Servlet2.5只能这样写
 		return getRequest().getSession().getServletContext();
 	}
 	
-	public HttpServletResponse getResponse() {
+	protected HttpServletResponse getResponse() {
 		return HttpRouter.getResponse();
 	}
-	public HttpServletRequest getRequest() {
+	protected HttpServletRequest getRequest() {
 		return HttpRouter.getRequest();
 	}
 	
-	protected void afterDomainCreate(SteedDomain domain){}
-	
-	public HttpSession getSession() {
+	protected HttpSession getSession() {
 		return getRequest().getSession();
 	}
 	

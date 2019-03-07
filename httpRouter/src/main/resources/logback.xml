@@ -13,7 +13,7 @@
 	<appender name="stdout"
 		class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
-			<pattern>%d{HH:mm:ss.SSS} [%thread] %caller{1} %-5level %logger{36} - %msg%n
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
 			</pattern>
 		</encoder>
 	</appender>
@@ -21,7 +21,7 @@
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<File>${log_path}/steedBoot</File>
 		<encoder>
-			<pattern>%d{HH:mm:ss.SSS} [%thread] %caller{1} %-5level %logger{36} - %msg%n
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
 			</pattern>
 		</encoder>
 		<rollingPolicy
@@ -35,7 +35,7 @@
 		<File>${log_path}/steedBoot-info</File>
 		<append>true</append>
 		<encoder>
-			<pattern>%d{HH:mm:ss.SSS} [%thread] %caller{1} %-5level %logger{36} - %msg%n
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
 			</pattern>
 		</encoder>
 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
@@ -51,7 +51,7 @@
 		<append>true</append>
 		<File>${log_path}/steedBoot-debug</File>
 		<encoder>
-			<pattern>%d{HH:mm:ss.SSS} [%thread] %caller{1} %-5level %logger{36} - %msg%n</pattern>
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
 		</encoder>
 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
 			<level>DEBUG</level>
@@ -66,7 +66,7 @@
 		<File>${log_path}/steedBoot-warn</File>
 		<append>true</append>
 		<encoder>
-			<pattern>%d{HH:mm:ss.SSS} [%thread] %caller{1} %-5level %logger{36} - %msg%n</pattern>
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
 		</encoder>
 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
 			<level>WARN</level>
@@ -81,7 +81,7 @@
 		<append>true</append>
 		<File>${log_path}/steedBoot-error</File>
 		<encoder>
-			<pattern>%d{HH:mm:ss.SSS} [%thread] %caller{1} %-5level %logger{36} - %msg%n</pattern>
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
 		</encoder>
 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
 			<level>ERROR</level>

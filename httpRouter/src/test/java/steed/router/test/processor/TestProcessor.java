@@ -3,14 +3,14 @@ package steed.router.test.processor;
 import java.util.HashMap;
 import java.util.Map;
 
-import steed.router.ModelDriven;
+import steed.router.annotation.DontAccess;
 import steed.router.annotation.Path;
 import steed.router.annotation.Power;
-import steed.router.processor.BaseProcessor;
+import steed.router.processor.ModelDrivenProcessor;
 
 @Path("/test")
 @Power("测试类权限")
-public class TestProcessor extends BaseProcessor implements ModelDriven<Student>{
+public class TestProcessor extends ModelDrivenProcessor<Student>{
 	public int param1;
 	public boolean param2;
 	public String param3;
@@ -18,6 +18,15 @@ public class TestProcessor extends BaseProcessor implements ModelDriven<Student>
 	@Power("测试权限1")
 	public void ad() {
 		
+	}
+	
+	@DontAccess
+	public void testDontAccess() {
+		
+	}
+	
+	public Student modelDrivenTest(){
+		return domain;
 	}
 	
 	public Map<String, Object> baseTypeParamTest(){
@@ -36,6 +45,10 @@ public class TestProcessor extends BaseProcessor implements ModelDriven<Student>
 		
 	}
 	
+	public static String testStatic() {
+		return "fdsfds";
+	}
+	
 	@Power("测试权限2")
 	public String ad3() {
 		return steed_forward;
@@ -44,12 +57,9 @@ public class TestProcessor extends BaseProcessor implements ModelDriven<Student>
 	public long ad5() {
 		return 0;
 	}
+	
 	public String ad4() {
 		return "/WEB-INF/jsp/index.jsp";
 	}
 
-	@Override
-	public Student getModel() {
-		return null;
-	}
 }

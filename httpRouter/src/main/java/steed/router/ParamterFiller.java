@@ -1,18 +1,21 @@
 package steed.router;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import steed.router.annotation.DontAccess;
 import steed.router.converter.BaseTypeConverter;
 import steed.router.converter.ParamterConverter;
 import steed.router.exception.RouterException;
-import steed.router.processor.BaseProcessor;
 import steed.util.base.StringUtil;
 import steed.util.logging.Logger;
 import steed.util.logging.LoggerFactory;
@@ -97,10 +100,16 @@ public class ParamterFiller {
     private void paramter2Field(Field field, Object container, HttpServletRequest request, String parameterName) {
     	logger.debug("开始填充参数%s",parameterName);
 		Object convertParamter = convertParamter(field, container, request, parameterName);
-		field.setAccessible(true);
+		
 		try {
-			field.set(container, convertParamter);
-		} catch (IllegalArgumentException | IllegalAccessException e) {
+			if (Modifier.isPublic(field.getModifiers())) {
+				field.setAccessible(true);
+					field.set(container, convertParamter);
+			}else {
+				Method method = getSetterMethod(field, container.getClass());
+				method.invoke(container, convertParamter);
+			}
+		} catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
 			logger.error("转换参数"+parameterName+"出错",e);
 		}
 	}
@@ -142,11 +151,51 @@ public class ParamterFiller {
      * @return
      */
     private boolean canAccess(Field field,Class<?> target) {
+    	if (field.getAnnotation(DontAccess.class) != null || Modifier.isStatic(field.getModifiers())) {
+			return false;
+		}
     	if (Modifier.isPublic(field.getModifiers())) {
 			return true;
 		}
-    	Method method = ReflectUtil.getMethod(target, StringUtil.getFieldIsMethodName(field.getName()), true);
-    	return method != null;
+    	Method method = getSetterMethod(field, target);
+    	return method != null && method.getAnnotation(DontAccess.class) == null;
     }
+    
+    private Method getSetterMethod(Field field, Class<?> target) {
+		return getMethod(target, StringUtil.getFieldSetterName(field.getName()), true,field.getType());
+	}
+    
+    private static final Map<String, Method> methodCache = new HashMap<>();
+    /**
+	 * 获取类的方法(包括父类)
+	 * @param clazz
+	 * @param methodName
+	 * @param onlyPublic 是否只获取public方法
+	 * @return 方法不存在则返回null
+	 */
+	public static Method getMethod(Class<?> clazz,String methodName,boolean onlyPublic,Class<?>... parameterTypes){
+//		Class<?> target = clazz;
+		Method declaredMethod = null;
+		String key = clazz.getName()+"."+methodName;
+		if (methodCache.containsKey(key)) {
+			declaredMethod = methodCache.get(key);
+			if (declaredMethod == null) {
+				return null;
+			}
+		}
+		while(clazz != Object.class && declaredMethod == null){
+			try {
+				declaredMethod = clazz.getDeclaredMethod(methodName,parameterTypes);
+			} catch (NoSuchMethodException | SecurityException e) {
+				//BaseUtil.getLogger().info("获取方法出错!{}",e.getMessage());
+			}
+			clazz = clazz.getSuperclass();
+		}
+		if (declaredMethod != null && onlyPublic && !Modifier.isPublic(declaredMethod.getModifiers())) {
+			return null;
+		}
+//		BaseUtil.getLogger().info("{}没有{}方法",new Object[]{target.getName(),methodName});
+		return declaredMethod;
+	}
 	
 }

@@ -4,7 +4,7 @@ public class Student {
 	private String name;
 	private String address;
 	private Integer number;
-	private boolean isMan;
+	private Boolean man;
 	
 	public String getName() {
 		return name;
@@ -24,10 +24,11 @@ public class Student {
 	public void setNumber(Integer number) {
 		this.number = number;
 	}
-	public boolean isMan() {
-		return isMan;
+	public Boolean getMan() {
+		return man;
 	}
-	public void setMan(boolean isMan) {
-		this.isMan = isMan;
+	public void setMan(Boolean man) {
+		this.man = man;
 	}
+	
 }
