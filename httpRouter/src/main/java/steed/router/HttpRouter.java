@@ -6,19 +6,13 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
-import org.springframework.core.type.filter.AnnotationTypeFilter;
-
 import steed.router.annotation.DontAccess;
-import steed.router.annotation.Path;
 import steed.router.annotation.Power;
 import steed.router.processor.BaseProcessor;
 import steed.util.logging.Logger;
@@ -32,30 +26,39 @@ import steed.util.logging.LoggerFactory;
  */  
 public abstract class HttpRouter{
 	public final static String steed_forward = "steed_forward";
+	public static int NOT_FOUND_StATUS_CODE = 404;
+	/**
+	 * 安全问题,不用403,否则类名,字段名,方法名等会被扫描到
+	 */
+	public static int FORBIDDEN_STATUS_CODE = 404;
+	
 	public static String charset = "UTF-8";
 	
 	private static final String jspPath = "/WEB-INF/jsp/";
 	
 	public final static ParamterFiller paramterFiller = new ParamterFiller();
-    private static Map<String, Class<? extends BaseProcessor>> pathProcessor = new HashMap<>();
+    private Map<String, Class<? extends BaseProcessor>> pathProcessor = new HashMap<>();
     private static Logger logger = LoggerFactory.getLogger(HttpRouter.class);
     
     private static final ThreadLocal<HttpServletRequest> requestThreadLocal = new ThreadLocal<HttpServletRequest>();
     private static final ThreadLocal<HttpServletResponse> responseThreadLocal = new ThreadLocal<HttpServletResponse>();
-	
+    
 	public static HttpServletRequest getRequest(){
 		return requestThreadLocal.get();
 	}
 	public static HttpServletResponse getResponse(){
 		return responseThreadLocal.get();
 	}
-    public static Map<String, Class<? extends BaseProcessor>> getPathProcessor() {
+	
+    public Map<String, Class<? extends BaseProcessor>> getPathProcessor() {
 		return pathProcessor;
 	}
-
-	static {
-    	scanProcessor();
+    
+    public HttpRouter(ProcessorScanner processorScanner) {
+    	super();
+    	pathProcessor = processorScanner.scanProcessor();
     }
+   
   
     /**
      * 	权限检测,可以根据具体业务根据uri或power判断用户是否有权限访问该url,可以在这里通过response返回没有权限信息或者抛MessageRuntimException
@@ -83,7 +86,6 @@ public abstract class HttpRouter{
 		}
 		response.setHeader("Content-Type", "application/json");
 		String json = object2Json(obj);
-		logger.debug("返回json----->"+json);
 		writeString(json,response);
 	}
 	
@@ -96,6 +98,7 @@ public abstract class HttpRouter{
 		ServletOutputStream out = response.getOutputStream();
 		out.write(string.getBytes(charset));
 		out.flush();
+		logger.debug("返回给客户端内容----->"+string);
 	}
     
     
@@ -146,7 +149,7 @@ public abstract class HttpRouter{
 					|| method.getAnnotation(DontAccess.class) != null
 					|| Modifier.isStatic(method.getModifiers())) {
 				logger.error("方法%s包含DontAccess注解或方法名以get,set开头或为静态方法,不能通过http访问!",method.toString());
-				response.sendError(403);
+				response.sendError(FORBIDDEN_STATUS_CODE);
 				return;
 			}
 			
@@ -161,7 +164,7 @@ public abstract class HttpRouter{
 			}
 			
 			try {
-				BaseProcessor newInstance = processor.newInstance();
+				BaseProcessor newInstance = newProcessor(processor);
 				fillParamters2ProcessorData(newInstance, request, response);
 				
 				newInstance.beforeAction(methodName);
@@ -192,20 +195,37 @@ public abstract class HttpRouter{
 			}
 		} catch (NoSuchMethodException | SecurityException e) {
 			logger.warn("在%s中未找到public的 %s 方法!",processor.getName(),methodName);
-			response.sendError(404);
+			response.sendError(NOT_FOUND_StATUS_CODE);
 			return;
 		}
     }
+    
+	protected BaseProcessor newProcessor(Class<? extends BaseProcessor> processor)
+			throws InstantiationException, IllegalAccessException {
+		/*if (context != null) {
+			try {
+				BaseProcessor bean = context.getBean(processor);
+				if (bean != null) {
+					return bean;
+				}
+			} catch (BeansException e) {
+				if (RouterConfig.devMode) {
+					logger.warn("从spring获取"+processor.getName()+"出错",e);
+				}
+			}
+		}*/
+		return processor.newInstance();
+	}
 	private Class<? extends BaseProcessor> getProcessor(HttpServletResponse response, String parentPath) throws IOException {
 		Class<? extends BaseProcessor> processor = pathProcessor.get(parentPath);
 		if (processor == null) {
 			logger.warn("未找到path为 %s 的Processor!", parentPath);
-			response.sendError(404);
+			response.sendError(NOT_FOUND_StATUS_CODE);
 			return null;
 		}
 		if (processor.getAnnotation(DontAccess.class) != null) {
 			logger.error("类%s包含DontAccess注解,不能通过http访问!",processor.getName());
-			response.sendError(403);
+			response.sendError(FORBIDDEN_STATUS_CODE);
 			return null;
 		}
 		return processor;
@@ -250,39 +270,6 @@ public abstract class HttpRouter{
 			return "index";
 		}
 		return method;
-	}
-
-	@SuppressWarnings("unchecked")
-	private static void scanProcessor() {
-		ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(false);
-		provider.addIncludeFilter(new AnnotationTypeFilter(Path.class));
-//		provider.addIncludeFilter(new AssignableTypeFilter(Processor.class));
-//		provider.setResourcePattern("**/*.class");
-		Set<BeanDefinition> findCandidateComponents = provider.findCandidateComponents("steed");
-		for (BeanDefinition temp:findCandidateComponents) {
-			try {
-				Class<? extends BaseProcessor> forName = (Class<? extends BaseProcessor>) Class.forName(temp.getBeanClassName());
-				Path annotation = forName.getAnnotation(Path.class);
-				String path = annotation.value();
-				if (pathProcessor.containsKey(path)) {
-					logger.warn("%s和%s的path均为%s,%s将被忽略!",pathProcessor.get(path).getName(),temp.getBeanClassName(),path,temp.getBeanClassName());
-					continue;
-				}
-				pathProcessor.put(addSprit(path), forName);
-			} catch (ClassNotFoundException | ClassCastException e) {
-				logger.error("扫描Processor出错!",e);
-			}
-		}
-	} 
-	
-	private static String addSprit(String path) {
-		if (!path.startsWith("/")) {
-			path = "/" + path;
-		}
-		if (!path.endsWith("/")) {
-			path = path + "/";
-		}
-		return path;
 	}
 	
 }

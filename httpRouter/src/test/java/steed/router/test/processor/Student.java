@@ -1,11 +1,20 @@
 package steed.router.test.processor;
 
+import java.util.Date;
+
 public class Student {
 	private String name;
 	private String address;
 	private Integer number;
 	private Boolean man;
+	private Date enterDate;
 	
+	public Date getEnterDate() {
+		return enterDate;
+	}
+	public void setEnterDate(Date enterDate) {
+		this.enterDate = enterDate;
+	}
 	public String getName() {
 		return name;
 	}

@@ -14,11 +14,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import steed.router.HttpRouter;
-import steed.router.SimpleHttpRouter;
-import steed.util.logging.LoggerFactory;
 
 @WebFilter(urlPatterns="/*")
-public class TestFilter extends HttpFilter{
+public class RouterFilter extends HttpFilter{
 	
 	@Autowired
 	public HttpRouter httpRouter;

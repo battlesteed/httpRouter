@@ -13,6 +13,7 @@ import org.springframework.context.annotation.Configuration;
 
 import steed.router.HttpRouter;
 import steed.router.SimpleHttpRouter;
+import steed.router.SpringHttpRouter;
 import steed.util.logging.LoggerFactory;
 
 //@EnableAutoConfiguration
@@ -35,7 +36,7 @@ public class App{
 	@Bean
 	public HttpRouter getRouter() {
 		try {
-			return new SimpleHttpRouter() {
+			return new SpringHttpRouter("steed") {
 				
 				@Override
 				protected boolean checkPower(HttpServletRequest request, HttpServletResponse response, String uri,

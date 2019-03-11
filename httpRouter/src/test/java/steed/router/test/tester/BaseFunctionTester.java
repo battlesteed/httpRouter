@@ -1,12 +1,13 @@
-package steed.router.test;
+package steed.router.test.tester;
 
 
-import java.util.Arrays;
+import static org.junit.Assert.assertEquals;
+
 import java.util.Collections;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
-import java.util.Map.Entry;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -30,13 +31,17 @@ import com.google.gson.reflect.TypeToken;
 
 import steed.hibernatemaster.util.DaoUtil;
 import steed.router.test.processor.Student;
-import steed.util.base.StringUtil;
-
+import steed.util.base.DateUtil;
+/**
+ * 基础功能测试,参数填充,日期转换等
+ * @author battlesteed
+ *
+ */
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 //@Configuration
 //@WebAppConfiguration
-public class ParamterFillerTest {
+public class BaseFunctionTester {
 	@Autowired
 	private TestRestTemplate client;
 
@@ -60,6 +65,27 @@ public class ParamterFillerTest {
 			Assert.assertTrue(e.getValue().equals(params.getFirst(e.getKey())));
 		}
 	}
+	@Test
+	public void testStaticParam() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+		params.add("param4", new Random().nextLong()+"");
+		
+		String httpRestClient = httpRestClient("/test/testStaticParam", HttpMethod.POST, params);
+		assertEquals("null", httpRestClient);
+	}
+	
+	@Test
+	public void testAutowired() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+		MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+		params.add("param4", new Random().nextLong()+"");
+		
+		String httpRestClient = httpRestClient("/test/testAutowired", HttpMethod.POST, params);
+		assertEquals("true", httpRestClient);
+	}
 	
 	@Test
 	public void testModelDriven() {
@@ -75,6 +101,9 @@ public class ParamterFillerTest {
 		for(Entry<String, Object> e:entrySet) {
 			params.add(e.getKey(), e.getValue()+"");
 		}
+		String date = "2019-04-06 12:23";
+		student.setEnterDate(DateUtil.parseDate(date));
+		params.add("enterDate", date);
 		
 		String httpRestClient = httpRestClient("/test/modelDrivenTest", HttpMethod.POST, params);
 		Student s = new Gson().fromJson(httpRestClient, Student.class);
@@ -82,6 +111,7 @@ public class ParamterFillerTest {
 		for (Entry<String, Object> e:entrySet) {
 			Assert.assertTrue(e.getValue().equals(map.get(e.getKey())));
 		}
+		
 	}
 	
 	public String httpRestClient(String url, HttpMethod method, MultiValueMap<String, String> params) {
