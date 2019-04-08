@@ -25,7 +25,7 @@ public class RouterFilter extends HttpFilter{
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
 		String requestURI = ((HttpServletRequest)request).getRequestURI();
-		if (requestURI.endsWith(".ru") || requestURI.endsWith("/") || !requestURI.contains(".")) {
+		if (requestURI.endsWith(".ru") || requestURI.endsWith("/") || !requestURI.contains(".n cccccfvcffvgcfvcv")) {
 			httpRouter.forward((HttpServletRequest)request, (HttpServletResponse) response);
 		}else {
 			super.doFilter(request, response, chain);

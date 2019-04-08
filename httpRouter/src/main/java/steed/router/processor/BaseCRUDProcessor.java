@@ -1,6 +1,7 @@
 package steed.router.processor;
 
 import java.io.Serializable;
+
 import java.lang.reflect.Field;
 import java.util.Enumeration;
 import java.util.List;
@@ -19,17 +20,8 @@ import steed.router.HttpRouter;
 import steed.util.base.DomainUtil;
 import steed.util.base.StringUtil;
 import steed.util.reflect.ReflectUtil;
-/**
- * 处理器,处理HttpRouter分发过来的http请求<br>
- * 若Processor中的方法返回String,HttpRouter会forward到String对应的jsp页面(若string以.jsp结尾)或直接把string内容返回给客户端,若返回其它类型的对象,则会将对象转成json写到response,
- * 若方法返回null或方法返回值为void则HttpRouter不做任何处理<br><br>
- *  注意:  该类的所有public方法和字段均会被http请求访问到,请注意安全.<b>不要乱用public修饰符!</b>
- *  
- * @author battlesteed
- * @see #steed_forward
- *
- */
-public class BaseAdminProcessor<SteedDomain extends BaseDatabaseDomain> extends ModelDrivenProcessor<SteedDomain> {
+
+public class BaseCRUDProcessor<SteedDomain extends BaseDatabaseDomain> extends ModelDrivenProcessor<SteedDomain> {
 	private static final long serialVersionUID = 7774350640186420795L;
 	
 	/**
@@ -138,11 +130,7 @@ public class BaseAdminProcessor<SteedDomain extends BaseDatabaseDomain> extends 
 
 	/**
 	 * 
-	 * 自动把model作为查询条件查询数据库
-		（关于如何定义实体类并用model作为查询条件请看cn.com.beyondstar.domain.people.People）
-		并把结果集放到steed.domain.application.Page中并把page
-		以"page"为key放到request域中
-		你要做的只是从jsp页面读取page中的结果集并显示出来而已
+	 * 
 	 * 
 	 * @return steed_forward
 	 */

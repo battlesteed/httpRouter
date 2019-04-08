@@ -16,7 +16,6 @@ import java.io.Serializable;
  *  <li>所有加了{@link steed.router.annotation.DontAccess}注解或非public或静态的类,字段,方法均会禁止http访问</li>
  *  <ul>
  * @author battlesteed
- * @see #steed_forward
  * @see steed.router.annotation.DontAccess
  *
  */
@@ -33,12 +32,16 @@ public abstract class BaseProcessor implements Serializable {
 	 * Processor开始处理http请求之前会执行该方法
 	 * @param methodName Processor即将被http访问到的方法名
 	 */
-	public abstract void beforeAction(String methodName);
+	public void beforeAction(String methodName) {
+		
+	}
 	
 	/**
 	 * Processor开始处理完请求后会执行该方法
 	 * @param methodName Processor即将被http访问到的方法名
 	 */
-	public abstract void afterAction(String methodName);
+	public void afterAction(String methodName) {
+		
+	}
 	
 }
