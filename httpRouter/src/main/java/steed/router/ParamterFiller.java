@@ -45,7 +45,6 @@ public class ParamterFiller {
 	/**
 	 *  注销参数转换器
 	 * @param clazz
-	 * @param converter
 	 */
 	public static void unRegistParamterConverter(Class<?> clazz) {
 		paramterConverterMap.remove(clazz);
@@ -97,7 +96,7 @@ public class ParamterFiller {
 		}
 	}
     
-    private void paramter2Field(Field field, Object container, HttpServletRequest request, String parameterName) {
+    protected void paramter2Field(Field field, Object container, HttpServletRequest request, String parameterName) {
     	logger.debug("开始填充参数%s",parameterName);
 		Object convertParamter = convertParamter(field, container, request, parameterName);
 		
@@ -114,7 +113,7 @@ public class ParamterFiller {
 		}
 	}
 
-	private Object convertParamter(Field field,Object container,HttpServletRequest request,String parameterName) {
+	protected Object convertParamter(Field field,Object container,HttpServletRequest request,String parameterName) {
     	for (Class<?> temp:paramterConverterMap.keySet()) {
 			if (temp.isAssignableFrom(field.getType())) {
 				return paramterConverterMap.get(temp).convert(field, container, request, parameterName);
@@ -150,7 +149,7 @@ public class ParamterFiller {
      * 没有public set方法的字段不自动填充数据
      * @return
      */
-    private boolean canAccess(Field field,Class<?> target) {
+    protected boolean canAccess(Field field,Class<?> target) {
     	if (field.getAnnotation(DontAccess.class) != null || Modifier.isStatic(field.getModifiers())) {
 			return false;
 		}

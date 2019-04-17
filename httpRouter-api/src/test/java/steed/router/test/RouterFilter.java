@@ -14,7 +14,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import steed.router.HttpRouter;
-import steed.router.RouterConfig;
 
 @WebFilter(urlPatterns="/*")
 public class RouterFilter extends HttpFilter{
@@ -32,13 +31,5 @@ public class RouterFilter extends HttpFilter{
 			super.doFilter(request, response, chain);
 		}
 	}
-
-	@Override
-	public void init() throws ServletException {
-		super.init();
-		RouterConfig.devMode = true;
-	}
-	
-	
 
 }

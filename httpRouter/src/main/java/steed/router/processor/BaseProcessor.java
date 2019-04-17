@@ -1,6 +1,18 @@
 package steed.router.processor;
 
+import java.io.IOException;
 import java.io.Serializable;
+
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import steed.router.HttpRouter;
+import steed.router.RouterConfig;
+import steed.router.domain.Message;
+import steed.util.AssertUtil;
+import steed.util.base.StringUtil;
 /**
  * 处理器,处理HttpRouter分发过来的http请求<br>
  * 若Processor中的方法返回String,HttpRouter会forward到String对应的jsp页面(若string以.jsp结尾)或直接把string内容返回给客户端,若返回其它类型的对象,则会将对象转成json写到response,
@@ -14,7 +26,7 @@ import java.io.Serializable;
  *  <li>A类父类及A类所有非public 方法或有参数的方法或方法名以get,set开头的方法均不会被http请求调用.</li>
  *  <li>A类父类及A类所有public字段或public 的 set方法  均会被自动填充http请求传过来的参数 </li>
  *  <li>所有加了{@link steed.router.annotation.DontAccess}注解或非public或静态的类,字段,方法均会禁止http访问</li>
- *  <ul>
+ *  </ul>
  * @author battlesteed
  * @see steed.router.annotation.DontAccess
  *
@@ -26,7 +38,7 @@ public abstract class BaseProcessor implements Serializable {
 	 * (例如该Processor的path是“admin”，调用的方法是"index",则对应的jsp路径为“/WEB-INF/jsp/admin/index.jsp”)
 	 * 
 	 */
-	protected static final String steed_forward = steed.router.HttpRouter.steed_forward;
+	protected static final String steed_forward = RouterConfig.steed_forward;
 	
 	/**
 	 * Processor开始处理http请求之前会执行该方法
@@ -42,6 +54,68 @@ public abstract class BaseProcessor implements Serializable {
 	 */
 	public void afterAction(String methodName) {
 		
+	}
+	
+	protected HttpServletResponse getResponse() {
+		return HttpRouter.getResponse();
+	}
+	protected HttpServletRequest getRequest() {
+		return HttpRouter.getRequest();
+//		return ContextUtil.getRequest();
+	}
+	
+	protected HttpSession getSession() {
+		return getRequest().getSession();
+	}
+	
+	/**
+	 * 把对象以json形式写到response的输出流，一般用于ajax
+	 * @param obj 要输出的对象
+	 */
+	protected void writeJson(Object obj){
+		writeString(RouterConfig.defaultJsonSerializer.object2Json(obj));
+	}
+	
+	/**
+	 * 把string写到response的输出流
+	 * @param string
+	 */
+	protected void writeString(String string){
+		try {
+			ServletOutputStream out;
+			out = getResponse().getOutputStream();
+			out.write(StringUtil.getSystemCharacterSetBytes(string));
+			out.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void assertTrue(boolean yourAssert,String message){
+		AssertUtil.assertTrue(yourAssert, message, Message.statusCode_UnknownError);
+	}
+	public void assertNotEmpty(String asserted,String message,int statusCode){
+	}
+	public void assertNotEmpty(String asserted,String message){
+		AssertUtil.assertTrue(!StringUtil.isStringEmpty(asserted), message);
+	}
+	public void assertEmpty(String asserted,String message){
+		AssertUtil.assertTrue(StringUtil.isStringEmpty(asserted), message);
+	}
+	public void assertEmpty(String asserted,String message,int statusCode){
+		AssertUtil.assertTrue(StringUtil.isStringEmpty(asserted), message,statusCode);
+	}
+	public void assertNotNull(Object asserted,String message){
+		AssertUtil.assertNotNull(asserted, message, Message.statusCode_UnknownError);
+	}
+	public static void assertNotNull(Object asserted,String message,int statusCode){
+		AssertUtil.assertTrue(asserted != null, message,statusCode);
+	}
+	public void assertNull(Object asserted,String message){
+		AssertUtil.assertTrue(asserted == null, message);
+	}
+	public void assertNull(Object asserted,String message,int statusCode){
+		AssertUtil.assertTrue(asserted == null, message,statusCode);
 	}
 	
 }

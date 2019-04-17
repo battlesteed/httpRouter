@@ -5,7 +5,7 @@ import java.lang.reflect.ParameterizedType;
 import steed.router.ModelDriven;
 import steed.router.exception.ReflectException;
 
-public class ModelDrivenProcessor<SteedDomain> extends BaseProcessor implements ModelDriven<SteedDomain> {
+public abstract class ModelDrivenProcessor<SteedDomain> extends BaseProcessor implements ModelDriven<SteedDomain> {
 	private static final long serialVersionUID = 7774350640186420795L;
 	
 	protected SteedDomain domain;
@@ -36,20 +36,4 @@ public class ModelDrivenProcessor<SteedDomain> extends BaseProcessor implements 
 		return getModelByReflect();
 	}
 
-	@Override
-	public void onModelReady(SteedDomain t) {
-		
-	}
-
-	@Override
-	public void beforeAction(String methodName) {
-		
-	}
-
-	@Override
-	public void afterAction(String methodName) {
-		
-	}
-
-	
 }

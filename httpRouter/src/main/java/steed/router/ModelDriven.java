@@ -7,5 +7,5 @@ public interface ModelDriven<T> {
      * 可以在该方法设置model额外的字段,比如组织,公司什么的
      * @param t
      */
-    void onModelReady(T t);
+    default void onModelReady(T t) {};
 }

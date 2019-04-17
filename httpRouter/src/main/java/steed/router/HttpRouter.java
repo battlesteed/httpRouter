@@ -12,8 +12,13 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import steed.hibernatemaster.Config;
+import steed.hibernatemaster.util.DaoUtil;
+import steed.hibernatemaster.util.HibernateUtil;
 import steed.router.annotation.DontAccess;
 import steed.router.annotation.Power;
+import steed.router.domain.Message;
+import steed.router.exception.message.MessageExceptionInterface;
 import steed.router.processor.BaseProcessor;
 import steed.util.logging.Logger;
 import steed.util.logging.LoggerFactory;
@@ -25,16 +30,6 @@ import steed.util.logging.LoggerFactory;
  * 
  */  
 public abstract class HttpRouter{
-	public final static String steed_forward = "steed_forward";
-	public static int NOT_FOUND_StATUS_CODE = 404;
-	/**
-	 * 安全问题,不用403,否则类名,字段名,方法名等会被扫描到
-	 */
-	public static int FORBIDDEN_STATUS_CODE = 404;
-	
-	public static String charset = "UTF-8";
-	
-	private static final String jspPath = "/WEB-INF/jsp/";
 	
 	public final static ParamterFiller paramterFiller = new ParamterFiller();
     private Map<String, Class<? extends BaseProcessor>> pathProcessor = new HashMap<>();
@@ -57,6 +52,8 @@ public abstract class HttpRouter{
     public HttpRouter(ProcessorScanner processorScanner) {
     	super();
     	pathProcessor = processorScanner.scanProcessor();
+    	Config.autoBeginTransaction = true;
+    	Config.autoCommitTransaction = false;
     }
    
   
@@ -73,20 +70,26 @@ public abstract class HttpRouter{
      * @param object 要转换的json对象
      * @return json字符串
      */
-    protected abstract String object2Json(Object object);
+    protected String object2Json(Object object) {
+    	return RouterConfig.defaultJsonSerializer.object2Json(object);
+    }
 
 	/**
 	 * 把对象以json形式写到response的输出流，一般用于ajax
 	 * @param obj 要输出的对象
 	 * @throws IOException 
 	 */
-	protected void writeJsonMessage(Object obj,HttpServletResponse response) throws IOException{
+	protected void writeJsonMessage(Object obj,HttpServletResponse response){
 		if (obj == null) {
 			return;
 		}
 		response.setHeader("Content-Type", "application/json");
 		String json = object2Json(obj);
-		writeString(json,response);
+		try {
+			writeString(json,response);
+		} catch (IOException e) {
+			logger.error("返回json给客户端出错!",e);
+		}
 	}
 	
 	/**
@@ -96,7 +99,7 @@ public abstract class HttpRouter{
 	 */
 	protected void writeString(String string,HttpServletResponse response) throws IOException{
 		ServletOutputStream out = response.getOutputStream();
-		out.write(string.getBytes(charset));
+		out.write(string.getBytes(RouterConfig.charset));
 		out.flush();
 		logger.debug("返回给客户端内容----->"+string);
 	}
@@ -116,6 +119,38 @@ public abstract class HttpRouter{
 			}
 		}
 	}
+    
+    protected boolean shouldReturnJsonMessage(Exception e,HttpServletRequest request, HttpServletResponse response) {
+    	return "XMLHttpRequest".equalsIgnoreCase(request.getHeader("X-Requested-With"));
+    }
+    
+    protected void onException(Exception e,HttpServletRequest request, HttpServletResponse response) {
+    	Message message;
+    	if (e instanceof MessageExceptionInterface) {
+			message = ((MessageExceptionInterface)e).getMsg();
+			if (RouterConfig.devMode) {
+				logger.debug("抛出异常提示:",e);
+			}
+		}else {
+			message = new Message(Message.statusCode_UnknownError, "系统繁忙!");
+			if (RouterConfig.devMode) {
+				message.setMessage(e.getMessage());
+			}
+			logger.error("发生未知错误!",e);
+		}
+    	if (shouldReturnJsonMessage(e, request, response)) {
+			writeJsonMessage(message, response);
+		}else {
+			try {
+				request.setAttribute(RouterConfig.exceptionAttributeKey, e);
+				request.setAttribute(RouterConfig.messageAttributeKey, RouterConfig.messageAttributeKey);
+				request.getRequestDispatcher(mergePath(RouterConfig.jspPath, RouterConfig.message_page)).forward(request, response);
+			} catch (ServletException | IOException e1) {
+				logger.error("跳转消息提示页出错!",e);
+			}
+		}
+    	//writeJsonMessage(obj, response);
+    }
   
     public void forward(HttpServletRequest request, HttpServletResponse response){  
     	try {
@@ -126,9 +161,17 @@ public abstract class HttpRouter{
 			} catch (IOException | ServletException e) {
 				logger.error("httpRouter分发请求出错!",e);
 			}
+			if (DaoUtil.getTransactionType() != null) {
+				DaoUtil.managTransaction();
+			}
+		}catch (Exception e) {
+			onException(e, request, response);
+			DaoUtil.rollbackTransaction();
 		}finally {
 			requestThreadLocal.remove();
 			responseThreadLocal.remove();
+			HibernateUtil.release();
+			DaoUtil.relese();
 		}
     }
     
@@ -149,7 +192,7 @@ public abstract class HttpRouter{
 					|| method.getAnnotation(DontAccess.class) != null
 					|| Modifier.isStatic(method.getModifiers())) {
 				logger.error("方法%s包含DontAccess注解或方法名以get,set开头或为静态方法,不能通过http访问!",method.toString());
-				response.sendError(FORBIDDEN_STATUS_CODE);
+				response.sendError(RouterConfig.FORBIDDEN_STATUS_CODE);
 				return;
 			}
 			
@@ -174,8 +217,8 @@ public abstract class HttpRouter{
 				if (invoke != null) {
 					if (invoke instanceof String) {
 						String jsp = (String) invoke;
-						if (steed_forward.equals(invoke)) {
-							jsp = mergePath(jspPath, parentPath+methodName+".jsp");
+						if (RouterConfig.steed_forward.equals(invoke)) {
+							jsp = mergePath(RouterConfig.jspPath, parentPath+methodName+".jsp");
 						}
 						if (jsp.endsWith(".jsp")) {
 							logger.debug("forward到%s",jsp);
@@ -195,7 +238,7 @@ public abstract class HttpRouter{
 			}
 		} catch (NoSuchMethodException | SecurityException e) {
 			logger.warn("在%s中未找到public的 %s 方法!",processor.getName(),methodName);
-			response.sendError(NOT_FOUND_StATUS_CODE);
+			response.sendError(RouterConfig.NOT_FOUND_StATUS_CODE);
 			return;
 		}
     }
@@ -220,12 +263,12 @@ public abstract class HttpRouter{
 		Class<? extends BaseProcessor> processor = pathProcessor.get(parentPath);
 		if (processor == null) {
 			logger.warn("未找到path为 %s 的Processor!", parentPath);
-			response.sendError(NOT_FOUND_StATUS_CODE);
+			response.sendError(RouterConfig.NOT_FOUND_StATUS_CODE);
 			return null;
 		}
 		if (processor.getAnnotation(DontAccess.class) != null) {
 			logger.error("类%s包含DontAccess注解,不能通过http访问!",processor.getName());
-			response.sendError(FORBIDDEN_STATUS_CODE);
+			response.sendError(RouterConfig.FORBIDDEN_STATUS_CODE);
 			return null;
 		}
 		return processor;

@@ -3,14 +3,14 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<artifactId>httpRouter</artifactId>
-	<description>httpRouter</description>
+	<artifactId>httpRouter-api</artifactId>
+	<description>httpRouter-api module</description>
+	
 	
 	<packaging>jar</packaging>
 
-	<name>httpRouter</name>
+	<name>httpRouter-api</name>
 	<url>https://github.com/battlesteed/httpRouter</url>
-	
 
 	<parent>
 		<groupId>com.github.battlesteed</groupId>
@@ -59,13 +59,11 @@
 
 
 	<dependencies>
-		<!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
 		<dependency>
-		    <groupId>com.google.code.gson</groupId>
-		    <artifactId>gson</artifactId>
-			<optional>true</optional>
+			<groupId>com.github.battlesteed</groupId>
+			<artifactId>httpRouter</artifactId>
+			<version>${project.version}</version>
 		</dependency>
-	
 	</dependencies>
 	<build>
 		<plugins>

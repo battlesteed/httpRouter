@@ -17,6 +17,7 @@ import steed.hibernatemaster.domain.BaseDomain;
 import steed.hibernatemaster.domain.Page;
 import steed.hibernatemaster.util.DaoUtil;
 import steed.router.HttpRouter;
+import steed.router.domain.Message;
 import steed.util.base.DomainUtil;
 import steed.util.base.StringUtil;
 import steed.util.reflect.ReflectUtil;
@@ -87,17 +88,6 @@ public class BaseCRUDProcessor<SteedDomain extends BaseDatabaseDomain> extends M
 	protected ServletContext getServletContext() {
 		//艹，兼容Servlet2.5只能这样写
 		return getRequest().getSession().getServletContext();
-	}
-	
-	protected HttpServletResponse getResponse() {
-		return HttpRouter.getResponse();
-	}
-	protected HttpServletRequest getRequest() {
-		return HttpRouter.getRequest();
-	}
-	
-	protected HttpSession getSession() {
-		return getRequest().getSession();
 	}
 	
 	/**
@@ -244,9 +234,8 @@ public class BaseCRUDProcessor<SteedDomain extends BaseDatabaseDomain> extends M
 	 * 并以json格式返回保存状态（成功与否）到前端,
 	 * @return null
 	 */
-	public String save(){
-		saveDomain();
-		return null;
+	public void save(){
+		 saveDomain();
 	}
 	
 	
@@ -293,6 +282,31 @@ public class BaseCRUDProcessor<SteedDomain extends BaseDatabaseDomain> extends M
 		BaseDatabaseDomain model = (BaseDatabaseDomain) getModel();
 		model.updateNotNullField(updateEvenNull,strictlyMode);
 		return null;
+	}
+	@Override
+	public void afterAction(String methodName) {
+		super.afterAction(methodName);
+		String operation = null;
+		switch (methodName) {
+		case "save":
+			operation = "添加";
+			break;
+		case "delete":
+			operation = "删除";
+			break;
+		case "update":
+			operation = "修改";
+			break;
+		}
+		if (operation != null) {
+			boolean managTransaction = DaoUtil.managTransaction();
+			if (managTransaction) {
+				writeJson(new Message(operation+"成功!"));
+			}else {
+				writeJson(new Message(Message.statusCode_UnknownError,operation+"失败"));
+			}
+		}
+		
 	}
 	
 	
