@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletRequest;
  *  参数转换器,把http请求中的参数转换成java对象中的字段
  * @author battlesteed
  *
- *@see steed.router.ParamterFiller#registParamterConverter(Class, ParamterConverter)
+ *@see steed.router.SimpleParamterFiller#registParamterConverter(Class, ParamterConverter)
  */
 public interface ParamterConverter {
 	/**

@@ -4,11 +4,14 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -31,7 +34,7 @@ import steed.util.logging.LoggerFactory;
  */  
 public abstract class HttpRouter{
 	
-	public final static ParamterFiller paramterFiller = new ParamterFiller();
+	public final static ParameterFiller paramterFiller = new SimpleParamterFiller();
     private Map<String, Class<? extends BaseProcessor>> pathProcessor = new HashMap<>();
     private static Logger logger = LoggerFactory.getLogger(HttpRouter.class);
     
@@ -107,9 +110,10 @@ public abstract class HttpRouter{
     
     /**
      *   把http请求中的参数填充到Processor
+     * @throws Exception 
      */
     @SuppressWarnings("unchecked")
-	protected void fillParamters2ProcessorData(BaseProcessor processor,HttpServletRequest request,HttpServletResponse response) {
+	protected void fillParamters2ProcessorData(BaseProcessor processor,HttpServletRequest request,HttpServletResponse response) throws Exception {
     	paramterFiller.fillParamters2ProcessorData(processor, request, response);
     	if (processor instanceof ModelDriven<?>) {
 			Object model = ((ModelDriven<?>) processor).getModel();
@@ -152,8 +156,29 @@ public abstract class HttpRouter{
     	//writeJsonMessage(obj, response);
     }
   
+    private void printParam(ServletRequest req) {
+		List<String> keyList = Collections.list(req.getParameterNames());
+		if (!keyList.isEmpty()) {
+			logger.debug("-----------参数-----------");
+			StringBuffer buffer = new StringBuffer();
+			for (String s : keyList) {
+				String[] parameterValues = req.getParameterValues(s);
+				buffer.append(s).append( "----->");
+				for(String str:parameterValues){
+					buffer.append(str).append("   ");
+				}
+			}
+			logger.debug(buffer.toString());
+			logger.debug("-----------参数-----------");
+		}
+	}
+    
     public void forward(HttpServletRequest request, HttpServletResponse response){  
     	try {
+    		if (RouterConfig.devMode) {
+				printParam(request);
+				logger.debug("请求url--->%s", request.getRequestURL());
+			}
 			requestThreadLocal.set(request);
 			responseThreadLocal.set(response);
 			try {
@@ -175,7 +200,7 @@ public abstract class HttpRouter{
 		}
     }
     
-    private void forwardNow(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException{  
+    private void forwardNow(HttpServletRequest request, HttpServletResponse response) throws Exception{  
 		String requestURI = request.getRequestURI();
 		String parentPath = getParentPath(requestURI);
 		Class<? extends BaseProcessor> processor = getProcessor(response, parentPath);
@@ -230,11 +255,17 @@ public abstract class HttpRouter{
 						writeJsonMessage(invoke, response);
 					}
 				}
-			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
-					| InstantiationException e) {
-				logger.warn("实例化%s失败!",processor.getName());
-				response.sendError(500);
-				return;
+			} catch (Exception e) {
+				if (e instanceof InvocationTargetException) {
+					InvocationTargetException e1 = (InvocationTargetException) e;
+					Throwable cause = e1.getCause();
+					if (cause != null && cause instanceof Exception) {
+						e = (Exception) cause;
+					}
+				}
+				logger.warn(processor.getName()+"处理请求失败!",e);
+//				response.sendError(500);
+				throw e;
 			}
 		} catch (NoSuchMethodException | SecurityException e) {
 			logger.warn("在%s中未找到public的 %s 方法!",processor.getName(),methodName);

@@ -26,9 +26,9 @@ import steed.util.reflect.ReflectUtil;
  * @author battlesteed
  *
  */
-public class ParamterFiller {
+public class SimpleParamterFiller implements ParameterFiller{
 	private static LinkedHashMap<Class<?>, ParamterConverter> paramterConverterMap = new LinkedHashMap<>();
-	private static final Logger logger =LoggerFactory.getLogger(ParamterFiller.class);
+	private static final Logger logger =LoggerFactory.getLogger(SimpleParamterFiller.class);
 	private static final BaseTypeConverter baseTypeConverter = new BaseTypeConverter();
 	
 	/**
@@ -66,11 +66,9 @@ public class ParamterFiller {
 		}
 	}*/
 	
-	  /**
-      *     把http请求中的参数填充到Processor
-     *    
-     */
-    protected void fillParamters2ProcessorData(Object container,HttpServletRequest request,HttpServletResponse response) {
+	
+	@Override
+    public void fillParamters2ProcessorData(Object container,HttpServletRequest request,HttpServletResponse response) throws Exception {
 		/*Object model = null;
 		if (processor instanceof ModelDriven<?>) {
 			model = ((ModelDriven<?>) processor).getModel();
@@ -96,20 +94,21 @@ public class ParamterFiller {
 		}
 	}
     
-    protected void paramter2Field(Field field, Object container, HttpServletRequest request, String parameterName) {
-    	logger.debug("开始填充参数%s",parameterName);
-		Object convertParamter = convertParamter(field, container, request, parameterName);
+    protected void paramter2Field(Field field, Object container, HttpServletRequest request, String parameterName) throws Exception {
 		
 		try {
+			logger.debug("开始填充参数%s",parameterName);
+			Object convertParamter = convertParamter(field, container, request, parameterName);
 			if (Modifier.isPublic(field.getModifiers())) {
 				field.setAccessible(true);
-					field.set(container, convertParamter);
+				field.set(container, convertParamter);
 			}else {
 				Method method = getSetterMethod(field, container.getClass());
 				method.invoke(container, convertParamter);
 			}
 		} catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
 			logger.error("转换参数"+parameterName+"出错",e);
+			throw e;
 		}
 	}
 
@@ -130,7 +129,7 @@ public class ParamterFiller {
     }
     
     
-    private Object getFieldValue(Field field,Object target,HttpServletRequest request,String parameterName) {
+    protected Object getFieldValue(Field field,Object target,HttpServletRequest request,String parameterName) {
     	field.setAccessible(true);
     	Object object = null;
 		try {

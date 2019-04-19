@@ -223,10 +223,9 @@ public class BaseCRUDProcessor<SteedDomain extends BaseDatabaseDomain> extends M
 	 *
 	 * @return null
 	 */
-	public String delete(){
+	public void delete(){
 		BaseDatabaseDomain model = (BaseDatabaseDomain) getModel();
 		model.delete();
-		return null;
 	}
 	
 	/**
