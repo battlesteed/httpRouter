@@ -4,13 +4,25 @@ import java.io.Serializable;
 
 public class Parameter implements Serializable{
 	private boolean require = true;
+	/**
+	 * 无需在json文件配置,自动填充
+	 */
 	private String type;
+	private String desc;
 	private int maxLength = -1;
 	private int minLength = -1;
 	public boolean isRequire() {
 		return require;
 	}
 	
+	public String getDesc() {
+		return desc;
+	}
+
+	public void setDesc(String desc) {
+		this.desc = desc;
+	}
+
 	/*
 	 * @Override public int hashCode() { if (name == null) { return 0; } return
 	 * name.hashCode(); }

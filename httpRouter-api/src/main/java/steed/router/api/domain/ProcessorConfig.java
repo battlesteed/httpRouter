@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ProcessorConfig {
+	/**
+	 * 无需在json文件配置,自动填充
+	 */
 	private String path;
 	private String desc;
 	private Map<String, Parameter> parameters;

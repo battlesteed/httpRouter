@@ -1,7 +1,5 @@
 package steed.router.processor;
 
-import java.lang.reflect.ParameterizedType;
-
 import steed.router.ModelDriven;
 import steed.router.exception.ReflectException;
 
@@ -16,13 +14,11 @@ public abstract class ModelDrivenProcessor<SteedDomain> extends BaseProcessor im
 	 * 通过泛型获取action对应的model
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	private SteedDomain getModelByReflect(){
 		if (domain != null) {
 			return domain;
 		}
-		ParameterizedType parameterizedType = (ParameterizedType)this.getClass().getGenericSuperclass();
-		Class<SteedDomain> clazz = (Class<SteedDomain>) (parameterizedType.getActualTypeArguments()[0]); 
+		Class<SteedDomain> clazz = getModelClass(); 
 		try {
 			domain = clazz.newInstance();
 			return domain;
@@ -30,7 +26,7 @@ public abstract class ModelDrivenProcessor<SteedDomain> extends BaseProcessor im
 			throw new ReflectException(e);
 		}
 	}
-	
+
 	@Override
 	public SteedDomain getModel() {
 		return getModelByReflect();

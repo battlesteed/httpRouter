@@ -34,7 +34,7 @@ import steed.util.logging.LoggerFactory;
  */  
 public abstract class HttpRouter{
 	
-	public final static ParameterFiller paramterFiller = new SimpleParamterFiller();
+	protected ParameterFiller paramterFiller = new SimpleParamterFiller();
     private Map<String, Class<? extends BaseProcessor>> pathProcessor = new HashMap<>();
     private static Logger logger = LoggerFactory.getLogger(HttpRouter.class);
     
@@ -48,7 +48,13 @@ public abstract class HttpRouter{
 		return responseThreadLocal.get();
 	}
 	
-    public Map<String, Class<? extends BaseProcessor>> getPathProcessor() {
+    public ParameterFiller getParamterFiller() {
+		return paramterFiller;
+	}
+	public void setParamterFiller(ParameterFiller paramterFiller) {
+		this.paramterFiller = paramterFiller;
+	}
+	public Map<String, Class<? extends BaseProcessor>> getPathProcessor() {
 		return pathProcessor;
 	}
     
@@ -335,7 +341,7 @@ public abstract class HttpRouter{
 		return null;
 	}
     
-	private static String getMethodName(String requestURI) {
+	 public String getMethodName(String requestURI) {
 		String method = requestURI.substring(requestURI.lastIndexOf("/")+1,requestURI.length());
     	if (method.contains(".")) {
 			method = method.substring(0,method.indexOf("."));

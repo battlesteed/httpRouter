@@ -14,12 +14,23 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import steed.router.HttpRouter;
+import steed.router.api.APIParamterFiller;
 
 @WebFilter(urlPatterns="/*")
 public class RouterFilter extends HttpFilter{
 	
 	@Autowired
 	public HttpRouter httpRouter;
+
+	
+	
+	@Override
+	public void init() throws ServletException {
+		super.init();
+		httpRouter.setParamterFiller(new APIParamterFiller(httpRouter));
+	}
+
+
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
