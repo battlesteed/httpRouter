@@ -4,11 +4,14 @@ import java.lang.reflect.Field;
 
 import javax.servlet.http.HttpServletRequest;
 
+import steed.util.logging.Logger;
+import steed.util.logging.LoggerFactory;
 import steed.util.reflect.ReflectUtil;
 
 public class BaseTypeConverter implements ParamterConverter{
 //	public static Class<?>[] baseTypeClass = new Class<?>[] {Byte.class,Short.class,Integer.class,Float.class,Boolean.class,Character.class,Double.class ,Long.class};
-
+	private static Logger logger = LoggerFactory.getLogger(BaseTypeConverter.class);
+	
 	@Override
 	public Object convert(Field field, Object target, HttpServletRequest request, String parameterName) {
 		boolean classBaseData = ReflectUtil.isClassBaseType(field.getType());

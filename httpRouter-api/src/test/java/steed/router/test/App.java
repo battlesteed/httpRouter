@@ -43,6 +43,13 @@ public class App{
 					LoggerFactory.getLogger().debug("检测权限%s,uri:%s",power,uri);
 					return super.checkPower(request, response, uri, power);
 				}
+
+				@Override
+				protected boolean shouldReturnJsonMessage(Exception e, HttpServletRequest request,
+						HttpServletResponse response) {
+					return true;
+				}
+				
 			};
 		} catch (Error e) {
 			e.printStackTrace();

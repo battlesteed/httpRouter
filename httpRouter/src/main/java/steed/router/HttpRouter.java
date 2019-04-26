@@ -86,16 +86,15 @@ public abstract class HttpRouter{
 	/**
 	 * 把对象以json形式写到response的输出流，一般用于ajax
 	 * @param obj 要输出的对象
-	 * @throws IOException 
 	 */
-	protected void writeJsonMessage(Object obj,HttpServletResponse response){
+	protected void writeJsonMessage(Object obj,HttpServletRequest request,HttpServletResponse response){
 		if (obj == null) {
 			return;
 		}
 		response.setHeader("Content-Type", "application/json");
 		String json = object2Json(obj);
 		try {
-			writeString(json,response);
+			writeString(json, request, response);
 		} catch (IOException e) {
 			logger.error("返回json给客户端出错!",e);
 		}
@@ -106,7 +105,7 @@ public abstract class HttpRouter{
 	 * @param string
 	 * @throws IOException 
 	 */
-	protected void writeString(String string,HttpServletResponse response) throws IOException{
+	protected void writeString(String string, HttpServletRequest request, HttpServletResponse response) throws IOException{
 		ServletOutputStream out = response.getOutputStream();
 		out.write(string.getBytes(RouterConfig.charset));
 		out.flush();
@@ -114,21 +113,7 @@ public abstract class HttpRouter{
 	}
     
     
-    /**
-     *   把http请求中的参数填充到Processor
-     * @throws Exception 
-     */
-    @SuppressWarnings("unchecked")
-	protected void fillParamters2ProcessorData(BaseProcessor processor,HttpServletRequest request,HttpServletResponse response) throws Exception {
-    	paramterFiller.fillParamters2ProcessorData(processor, request, response);
-    	if (processor instanceof ModelDriven<?>) {
-			Object model = ((ModelDriven<?>) processor).getModel();
-			if (model != null) {
-				paramterFiller.fillParamters2ProcessorData(model, request, response);
-				((ModelDriven<Object>) processor).onModelReady(model);
-			}
-		}
-	}
+   
     
     protected boolean shouldReturnJsonMessage(Exception e,HttpServletRequest request, HttpServletResponse response) {
     	return "XMLHttpRequest".equalsIgnoreCase(request.getHeader("X-Requested-With"));
@@ -149,7 +134,7 @@ public abstract class HttpRouter{
 			logger.error("发生未知错误!",e);
 		}
     	if (shouldReturnJsonMessage(e, request, response)) {
-			writeJsonMessage(message, response);
+			writeJsonMessage(message, request, response);
 		}else {
 			try {
 				request.setAttribute(RouterConfig.exceptionAttributeKey, e);
@@ -239,7 +224,7 @@ public abstract class HttpRouter{
 			
 			try {
 				BaseProcessor newInstance = newProcessor(processor);
-				fillParamters2ProcessorData(newInstance, request, response);
+				paramterFiller.fillParamters2ProcessorData(newInstance, request, response);
 				
 				newInstance.beforeAction(methodName);
 				Object invoke = method.invoke(newInstance);
@@ -255,10 +240,10 @@ public abstract class HttpRouter{
 							logger.debug("forward到%s",jsp);
 							request.getRequestDispatcher(jsp).forward(request, response);;
 						}else {
-							writeString(jsp, response);
+							writeString(jsp, request, response);
 						}
 					}else {
-						writeJsonMessage(invoke, response);
+						writeJsonMessage(invoke, request, response);
 					}
 				}
 			} catch (Exception e) {
@@ -269,7 +254,9 @@ public abstract class HttpRouter{
 						e = (Exception) cause;
 					}
 				}
-				logger.warn(processor.getName()+"处理请求失败!",e);
+				if (!(e instanceof MessageExceptionInterface)) {
+					logger.warn(processor.getName()+"处理请求失败!",e);
+				}
 //				response.sendError(500);
 				throw e;
 			}

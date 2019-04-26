@@ -221,7 +221,6 @@ public class BaseCRUDProcessor<SteedDomain extends BaseDatabaseDomain> extends M
 	 * 	删除model对应的表中主键为DomainUtil.getDomainId(model)的记录
 	 * 	并以json格式返回删除状态（成功与否）到前端，
 	 *
-	 * @return null
 	 */
 	public void delete(){
 		BaseDatabaseDomain model = (BaseDatabaseDomain) getModel();
@@ -231,7 +230,6 @@ public class BaseCRUDProcessor<SteedDomain extends BaseDatabaseDomain> extends M
 	/**
 	 * 把model保存到数据库，
 	 * 并以json格式返回保存状态（成功与否）到前端,
-	 * @return null
 	 */
 	public void save(){
 		 saveDomain();

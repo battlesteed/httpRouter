@@ -16,6 +16,7 @@ import steed.router.annotation.DontAccess;
 import steed.router.converter.BaseTypeConverter;
 import steed.router.converter.ParamterConverter;
 import steed.router.exception.RouterException;
+import steed.router.processor.BaseProcessor;
 import steed.util.base.StringUtil;
 import steed.util.logging.Logger;
 import steed.util.logging.LoggerFactory;
@@ -66,9 +67,19 @@ public class SimpleParamterFiller implements ParameterFiller{
 		}
 	}*/
 	
+    @Override
+	public void fillParamters2ProcessorData(BaseProcessor processor,HttpServletRequest request,HttpServletResponse response) throws Exception {
+    	fillParamters2Data(processor, request, response);
+    	if (processor instanceof ModelDriven<?>) {
+			Object model = ((ModelDriven<?>) processor).getModel();
+			if (model != null) {
+				fillParamters2Data(model, request, response);
+				((ModelDriven<Object>) processor).onModelReady(model);
+			}
+		}
+	}
 	
-	@Override
-    public void fillParamters2ProcessorData(Object container,HttpServletRequest request,HttpServletResponse response) throws Exception {
+    protected void fillParamters2Data(Object container,HttpServletRequest request,HttpServletResponse response) throws Exception {
 		/*Object model = null;
 		if (processor instanceof ModelDriven<?>) {
 			model = ((ModelDriven<?>) processor).getModel();
@@ -77,19 +88,25 @@ public class SimpleParamterFiller implements ParameterFiller{
     	Enumeration<String> parameterNames = request.getParameterNames();
 		while (parameterNames.hasMoreElements()) {
 			String parameterName = parameterNames.nextElement();
-			String[] split = parameterName.split("\\.");
-			Field field = null;
-			Class<?> target = container.getClass();
-			for( int i = 0; i < split.length; i++){
-				field = ReflectUtil.getField(target, split[i], false);
-				if (field == null || !canAccess(field, target)) {
-					break;
-				}
-				if (i == split.length-1) {
-					paramter2Field(field, container, request, parameterName);
-				}else {
-					container = getFieldValue(field, container, request, parameterName);
-				}
+			singleParamters2Data(container, request, parameterName);
+		}
+		
+	}
+
+    protected void singleParamters2Data(Object container, HttpServletRequest request, String parameterName)
+			throws Exception {
+		String[] split = parameterName.split("\\.");
+		Field field = null;
+		Class<?> target = container.getClass();
+		for( int i = 0; i < split.length; i++){
+			field = ReflectUtil.getField(target, split[i], false);
+			if (field == null || !canAccess(field, target)) {
+				break;
+			}
+			if (i == split.length-1) {
+				paramter2Field(field, container, request, parameterName);
+			}else {
+				container = getFieldValue(field, container, request, parameterName);
 			}
 		}
 	}
@@ -97,7 +114,9 @@ public class SimpleParamterFiller implements ParameterFiller{
     protected void paramter2Field(Field field, Object container, HttpServletRequest request, String parameterName) throws Exception {
 		
 		try {
-			logger.debug("开始填充参数%s",parameterName);
+			if (RouterConfig.devMode) {
+				logger.debug("开始填充参数%s:%s",parameterName, request.getParameter(parameterName));
+			}
 			Object convertParamter = convertParamter(field, container, request, parameterName);
 			if (Modifier.isPublic(field.getModifiers())) {
 				field.setAccessible(true);

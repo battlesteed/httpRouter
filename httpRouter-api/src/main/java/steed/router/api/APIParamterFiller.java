@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -21,9 +20,12 @@ import steed.router.HttpRouter;
 import steed.router.ModelDriven;
 import steed.router.SimpleParamterFiller;
 import steed.router.annotation.Path;
+import steed.router.api.domain.Api;
 import steed.router.api.domain.Parameter;
 import steed.router.api.domain.ProcessorConfig;
+import steed.router.exception.message.MessageRuntimeException;
 import steed.router.processor.BaseProcessor;
+import steed.util.AssertUtil;
 import steed.util.base.BaseUtil;
 import steed.util.base.StringUtil;
 import steed.util.logging.Logger;
@@ -129,27 +131,70 @@ public class APIParamterFiller extends SimpleParamterFiller {
 	}
 
 	@Override
-	public void fillParamters2ProcessorData(Object container, HttpServletRequest request, HttpServletResponse response)
-			throws Exception {
-
-		// TODO 数组,map填充
-		Enumeration<String> parameterNames = request.getParameterNames();
-		while (parameterNames.hasMoreElements()) {
-			String parameterName = parameterNames.nextElement();
-			String[] split = parameterName.split("\\.");
-			Field field = null;
-			Class<?> target = container.getClass();
-			for (int i = 0; i < split.length; i++) {
-				field = ReflectUtil.getField(target, split[i], false);
-				if (field == null || !canAccess(field, target)) {
-					break;
-				}
-				if (i == split.length - 1) {
-					paramter2Field(field, container, request, parameterName);
-				} else {
-					container = getFieldValue(field, container, request, parameterName);
-				}
+	public void fillParamters2ProcessorData(BaseProcessor processor, HttpServletRequest request,
+			HttpServletResponse response) throws Exception {
+		String methodName = router.getMethodName(request.getRequestURI());
+		ProcessorConfig processorConfig = configCache.get(processor.getClass());
+		Map<String, Parameter> parameters = null;
+		if (processorConfig != null) {
+			Api api = processorConfig.getApis().get(methodName);
+			parameters = api.getParameters();
+			parameters.entrySet().forEach((temp)->{
+				validateParameter(request, temp.getKey(), temp.getValue());
+			});
+		}
+		
+		fillParamters2Data(parameters, processor, request, response);
+    	if (processor instanceof ModelDriven<?>) {
+			Object model = ((ModelDriven<?>) processor).getModel();
+			if (model != null) {
+				fillParamters2Data(parameters,model, request, response);
+				((ModelDriven<Object>) processor).onModelReady(model);
 			}
 		}
 	}
+
+	private void validateParameter(HttpServletRequest request,String fieldName, Parameter rule) {
+		String value = request.getParameter(fieldName);
+		if (StringUtil.isStringEmpty(value)) {
+			AssertUtil.assertTrue(!rule.isRequire(), "参数"+fieldName+"必传!");
+		}else {
+			validateParameterType(fieldName, rule, value);
+		}
+	}
+
+	private void validateParameterType(String fieldName,Parameter rule,String value) {
+		switch (rule.getType().toLowerCase()) {
+		case "long":
+		case "int":
+			try {
+				Long.parseLong(value);
+			} catch (Exception e) {
+				throw new MessageRuntimeException(fieldName+"必须为"+rule.getType()+"类型!");
+			}
+			break;
+		case "string":
+
+		default:
+			break;
+		}
+	}
+
+	protected void fillParamters2Data(Map<String, Parameter> parameters,Object container, HttpServletRequest request, HttpServletResponse response)
+			throws Exception {
+		if (parameters == null) {
+			fillParamters2Data(container, request, response);
+			return;
+		}
+		Enumeration<String> parameterNames = request.getParameterNames();
+		while (parameterNames.hasMoreElements()) {
+			String parameterName = parameterNames.nextElement();
+			if (!parameters.containsKey(parameterName)) {
+				logger.info("参数%s不在parameters中,不自动装配.",parameterName);
+			}
+			singleParamters2Data(container, request, parameterName);
+		}
+	}
+
+	
 }
