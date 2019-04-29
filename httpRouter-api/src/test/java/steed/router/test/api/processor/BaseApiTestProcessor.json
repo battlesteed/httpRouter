@@ -1,0 +1,8 @@
+{
+	"desc":"基础api测试处理器",
+	"parameters":{
+		"sign":{}
+	},
+	"removeParameters":[],
+	"apis":{}
+}

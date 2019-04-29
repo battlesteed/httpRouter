@@ -13,6 +13,8 @@ import steed.router.RouterConfig;
 import steed.router.domain.Message;
 import steed.util.AssertUtil;
 import steed.util.base.StringUtil;
+import steed.util.logging.Logger;
+import steed.util.logging.LoggerFactory;
 /**
  * 处理器,处理HttpRouter分发过来的http请求<br>
  * 若Processor中的方法返回String,HttpRouter会forward到String对应的jsp页面(若string以.jsp结尾)或直接把string内容返回给客户端,若返回其它类型的对象,则会将对象转成json写到response,
@@ -32,6 +34,7 @@ import steed.util.base.StringUtil;
  *
  */
 public abstract class BaseProcessor implements Serializable {
+	private static Logger logger = LoggerFactory.getLogger(BaseProcessor.class);
 	private static final long serialVersionUID = 1L;
 	/**
 	 *  return该值会自动forward到该方法对应的jsp页面
@@ -82,6 +85,7 @@ public abstract class BaseProcessor implements Serializable {
 	 */
 	protected void writeString(String string){
 		try {
+			logger.debug("返回给客户端内容:%s",string);
 			ServletOutputStream out;
 			out = getResponse().getOutputStream();
 			out.write(StringUtil.getSystemCharacterSetBytes(string));

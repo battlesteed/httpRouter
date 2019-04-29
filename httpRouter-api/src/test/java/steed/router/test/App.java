@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import steed.router.HttpRouter;
+import steed.router.RouterConfig;
 import steed.router.SpringHttpRouter;
 import steed.util.logging.LoggerFactory;
 
@@ -29,6 +30,7 @@ public class App{
 	}*/
 
 	public static void main(String[] args) throws Exception {
+		RouterConfig.devMode = true;
 		SpringApplication.run(App.class, args);
 	}
 	

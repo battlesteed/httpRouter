@@ -30,7 +30,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import steed.hibernatemaster.util.DaoUtil;
-import steed.router.test.processor.Student;
+import steed.router.test.domain.Student;
 import steed.util.base.DateUtil;
 /**
  * 基础功能测试,参数填充,日期转换等

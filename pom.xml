@@ -226,6 +226,6 @@
 	<modules>
       <module>httpRouter</module>
       <module>httpRouter-api</module>
-     <!-- <module>httpRouter-test</module> -->
+      <module>httpRouter-test</module>
    </modules>
 </project>

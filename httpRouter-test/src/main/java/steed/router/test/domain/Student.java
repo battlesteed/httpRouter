@@ -1,8 +1,10 @@
-package steed.router.test.processor;
+package steed.router.test.domain;
 
 import java.util.Date;
 
-public class Student {
+import steed.hibernatemaster.domain.UUIDDomain;
+
+public class Student extends UUIDDomain{
 	private String name;
 	private String address;
 	private Integer number;

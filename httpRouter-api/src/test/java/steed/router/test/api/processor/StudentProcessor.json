@@ -1,0 +1,27 @@
+{
+	"name": "管理学生",
+	"desc": "管理学生",
+	"apis": {
+		"save": {
+			"desc":"添加学生",
+			"parameters":{
+				"name":{
+					"desc":"学生名"
+				},
+				"number":{
+					"require":false
+				}
+			}
+		},
+		"delete": {
+			"desc":"删除学生",
+			"parameters":{
+			}
+		}
+	},
+	"parameters":{
+		"id":{
+			"desc":"学生id"
+		}
+	}
+}

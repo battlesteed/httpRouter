@@ -31,7 +31,8 @@ public class MessageRuntimeException extends RuntimeException implements Message
 	}
 
 	public MessageRuntimeException(String message) {
-		super(message);
+		this(Message.statusCode_UnknownError,message);
+		
 	}
 	public MessageRuntimeException(int statusCode,String message) {
 		this(new Message(statusCode, message));

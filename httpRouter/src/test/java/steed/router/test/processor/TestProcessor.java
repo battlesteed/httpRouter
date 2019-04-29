@@ -10,6 +10,7 @@ import steed.router.annotation.DontAccess;
 import steed.router.annotation.Path;
 import steed.router.annotation.Power;
 import steed.router.processor.ModelDrivenProcessor;
+import steed.router.test.domain.Student;
 
 @Path("/test")
 @Power("测试类权限")
