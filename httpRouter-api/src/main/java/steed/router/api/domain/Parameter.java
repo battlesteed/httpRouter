@@ -7,6 +7,10 @@ public class Parameter implements Serializable{
 	/**
 	 * 无需在json文件配置,自动填充
 	 */
+	private String name;
+	/**
+	 * 无需在json文件配置,自动填充
+	 */
 	private String type;
 	private String desc;
 	private int maxLength = -1;
@@ -17,6 +21,14 @@ public class Parameter implements Serializable{
 	
 	public String getDesc() {
 		return desc;
+	}
+	
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public void setDesc(String desc) {

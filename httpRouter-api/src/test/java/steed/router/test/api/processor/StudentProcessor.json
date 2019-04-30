@@ -3,6 +3,7 @@
 	"desc": "管理学生",
 	"apis": {
 		"save": {
+			"name":"添加学生",
 			"desc":"添加学生",
 			"parameters":{
 				"name":{
@@ -14,6 +15,7 @@
 			}
 		},
 		"delete": {
+			"name":"删除学生",
 			"desc":"删除学生",
 			"parameters":{
 			}

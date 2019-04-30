@@ -8,6 +8,7 @@ public class ProcessorConfig {
 	 * 无需在json文件配置,自动填充
 	 */
 	private String path;
+	private String name;
 	private String desc;
 	private Map<String, Parameter> parameters;
 	private String[] removeParameters;
@@ -20,6 +21,13 @@ public class ProcessorConfig {
 	}
 	public String getDesc() {
 		return desc;
+	}
+	
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
 	}
 	public void setDesc(String desc) {
 		this.desc = desc;

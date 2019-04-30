@@ -18,6 +18,7 @@ import steed.router.api.domain.Parameter;
 import steed.router.api.domain.ProcessorConfig;
 import steed.router.processor.BaseProcessor;
 import steed.util.base.BaseUtil;
+import steed.util.base.PathUtil;
 import steed.util.base.StringUtil;
 import steed.util.logging.Logger;
 import steed.util.logging.LoggerFactory;
@@ -59,9 +60,10 @@ public class SimpleAPIConfigLoader implements APIConfigLoader {
 				
 				mergeMap(fatherParameter, fromJson.getRemoveParameters(), parameters);
 				
-				fromJson.getApis().values().forEach((api)->{
+				fromJson.getApis().forEach((key,api)->{
 					mergeMap(parameters, api.getRemoveParameters(), api.getParameters());
 					setParameterType(processor, api.getParameters());
+					api.setPath(PathUtil.mergePath(fromJson.getPath(), key));
 				});
 				configCache.put(processor, fromJson);
 				
@@ -115,13 +117,14 @@ public class SimpleAPIConfigLoader implements APIConfigLoader {
 	
 	
 	private void setParameterType(Class<? extends BaseProcessor> processor, Map<String, Parameter> parameters) {
-		parameters.entrySet().forEach((e)->{
-			if(StringUtil.isStringEmpty(e.getValue().getType())) {
-				Field field = getField(processor, e.getKey());
+		parameters.forEach((k,v)->{
+			if(StringUtil.isStringEmpty(v.getType())) {
+				Field field = getField(processor, k);
 				if (field != null) {
-					e.getValue().setType(field.getType().getSimpleName());
+					v.setType(field.getType().getSimpleName());
 				}
 			}
+			v.setName(k);
 		});
 	}
 }
