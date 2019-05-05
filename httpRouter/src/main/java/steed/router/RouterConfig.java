@@ -1,5 +1,7 @@
 package steed.router;
 
+import javax.servlet.http.HttpServletRequestWrapper;
+
 import com.google.gson.Gson;
 
 public class RouterConfig {
@@ -26,4 +28,6 @@ public class RouterConfig {
 	public static String jspPath = "/WEB-INF/jsp/";
 	
 	public static JsonSerializer defaultJsonSerializer = (obj)->{ return new Gson().toJson(obj);};
+	
+	public static XSSCleaner defaultXSSCleaner = new SimpleXSSCleanner();
 }

@@ -170,7 +170,7 @@ public abstract class HttpRouter{
 				printParam(request);
 				logger.debug("请求url--->%s", request.getRequestURL());
 			}
-			requestThreadLocal.set(request);
+			requestThreadLocal.set(new XSSCleanRequestWrapper(request));
 			responseThreadLocal.set(response);
 			try {
 				forwardNow(request, response);
