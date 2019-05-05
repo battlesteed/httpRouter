@@ -4,13 +4,10 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -19,6 +16,7 @@ import steed.router.api.SimpleAPIConfigLoader;
 import steed.router.api.domain.Api;
 import steed.router.api.domain.Parameter;
 import steed.router.api.domain.ProcessorConfig;
+import steed.router.api.domain.Summary;
 import steed.router.processor.BaseProcessor;
 import steed.util.base.BaseUtil;
 import steed.util.base.PathUtil;
@@ -32,6 +30,7 @@ public class SimpleDocumentGenerator implements DocumentGenerator{
 	private String templatePath;
 	private String destPath;
 	private String charset = "UTF-8";
+	private StringBuffer menus = new StringBuffer();
 	
 	public String getCharset() {
 		return charset;
@@ -64,6 +63,13 @@ public class SimpleDocumentGenerator implements DocumentGenerator{
 				generate(processorConfig);
 			}
 		});
+		
+		Summary summary = new Summary();
+		summary.setMenus(menus.toString());
+		
+		StringBuffer readTemplateFile = readTemplateFile(null, summary, "SUMMARY.md");
+		
+		writeDoc(readTemplateFile, getDocDest("SUMMARY.md"));
 	}
 	
 	protected StringBuffer replaceMark(String line,ProcessorConfig processorConfig,Object target) {
@@ -98,6 +104,8 @@ public class SimpleDocumentGenerator implements DocumentGenerator{
 					parameterDoc.append(readTemplateFile(processorConfig, value, "parameter.md"));
 				});
 				return parameterDoc.toString();
+			}else if(fieldValueByGetter instanceof Boolean) {
+				return (boolean)fieldValueByGetter ? "是":"否";
 			}
 		}
 		return "";
@@ -109,13 +117,25 @@ public class SimpleDocumentGenerator implements DocumentGenerator{
 		if (path.endsWith("/")) {
 			path = path.substring(0, path.length()-1);
 		}
-		File docDest = getDocDest(path+".md");
+		String docName = path+".md";
+		File docDest = getDocDest(docName);
+		if (docDest != null) {
+			writeDoc(doc, docDest);
+			logger.debug("生成文档%s成功",docName);
+		}
 		
+		
+		menus.append(String.format("* [%s](%s)", processorConfig.getName(),docName)).append("\n");
+		
+//		processorConfig. 
+	}
+
+	private void writeDoc(StringBuffer doc, File docDest) {
 		OutputStreamWriter out = null;
 		try {
 			out = new OutputStreamWriter(new FileOutputStream(docDest), charset);
 			BufferedWriter writer = new BufferedWriter(out);
-			writer.write(doc.toString());
+			writer.write(doc.toString().replaceAll("```\\s+```", ""));
 			writer.flush();
 			writer.close();
 		} catch (IOException e) {
@@ -129,7 +149,6 @@ public class SimpleDocumentGenerator implements DocumentGenerator{
 				}
 			}
 		}
-//		processorConfig. 
 	}
 
 	private StringBuffer readTemplateFile(ProcessorConfig processorConfig, Object target, String templateName) {
@@ -159,8 +178,11 @@ public class SimpleDocumentGenerator implements DocumentGenerator{
 		}
 	}
 
-	
 	protected File getDocDest(String docName) {
+		File lockFile = new File(PathUtil.mergePath(destPath, docName+".lock"));
+		if (lockFile.exists()) {
+			return null;
+		}
 		File docDest = new File(PathUtil.mergePath(destPath, docName));
 		if (docDest.exists()) {
 			docDest.delete();
@@ -169,6 +191,7 @@ public class SimpleDocumentGenerator implements DocumentGenerator{
 		docDest.delete();
 		return docDest;
 	}
+	
 	protected File getDocTemplate(String templateName) {
 		return new File(PathUtil.mergePath(templatePath, templateName));
 	}

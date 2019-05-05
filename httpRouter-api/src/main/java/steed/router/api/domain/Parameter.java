@@ -3,7 +3,9 @@ package steed.router.api.domain;
 import java.io.Serializable;
 
 public class Parameter implements Serializable{
-	private boolean require = true;
+	public static final boolean defaultRequire = true;
+	
+	private Boolean require;
 	/**
 	 * 无需在json文件配置,自动填充
 	 */
@@ -15,7 +17,9 @@ public class Parameter implements Serializable{
 	private String desc;
 	private int maxLength = -1;
 	private int minLength = -1;
-	public boolean isRequire() {
+	
+	
+	public Boolean isRequire() {
 		return require;
 	}
 	

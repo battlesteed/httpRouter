@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,6 +15,7 @@ import com.google.gson.JsonSyntaxException;
 
 import steed.router.ModelDriven;
 import steed.router.annotation.Path;
+import steed.router.api.annotation.DocParam;
 import steed.router.api.domain.Parameter;
 import steed.router.api.domain.ProcessorConfig;
 import steed.router.processor.BaseProcessor;
@@ -47,14 +49,14 @@ public class SimpleAPIConfigLoader implements APIConfigLoader {
 			fatherParameter.putAll(loadConfig((Class<? extends BaseProcessor>) processor.getSuperclass()));
 		}
 		
-		logger.debug("加载类%s的api配置",processor.getName());
 		URL resourceURL = BaseUtil.getResourceURL(processor.getName().replace(".", "/")+".json");
 		if (resourceURL != null) {
 			try {
+				logger.debug("加载类%s的api配置文件",processor.getName());
 				ProcessorConfig fromJson = new Gson().fromJson(new InputStreamReader(resourceURL.openStream()), ProcessorConfig.class);
 				Map<String, Parameter> parameters = fromJson.getParameters();
 				
-				setParameterType(processor, parameters);
+				setParameterInfo(processor, parameters);
 				
 				setPath(processor, fromJson);
 				
@@ -62,7 +64,7 @@ public class SimpleAPIConfigLoader implements APIConfigLoader {
 				
 				fromJson.getApis().forEach((key,api)->{
 					mergeMap(parameters, api.getRemoveParameters(), api.getParameters());
-					setParameterType(processor, api.getParameters());
+					setParameterInfo(processor, api.getParameters());
 					api.setPath(PathUtil.mergePath(fromJson.getPath(), key));
 				});
 				configCache.put(processor, fromJson);
@@ -99,32 +101,63 @@ public class SimpleAPIConfigLoader implements APIConfigLoader {
 	}
 	
 	private Class<?> getModelClass(Class<? extends ModelDriven<?>> clazz) {
-		ParameterizedType parameterizedType = (ParameterizedType)clazz.getGenericSuperclass();
-		return (Class<?>) (parameterizedType.getActualTypeArguments()[0]);
+			ParameterizedType parameterizedType = (ParameterizedType)clazz.getGenericSuperclass();
+		Type type = parameterizedType.getActualTypeArguments()[0];
+		if (type instanceof Class<?>) {
+			return (Class<?>)type;
+		}
+		return null;
 	}
 
 	private Field getField(Class<? extends BaseProcessor> processor, String fieldName) {
 		ReflectResult field = ReflectUtil.getChainField(processor, fieldName);
 		if (field == null && ModelDriven.class.isAssignableFrom(processor)) {
 			try {
-				field = ReflectUtil.getChainField(getModelClass((Class<? extends ModelDriven<?>>) processor), fieldName);
-			} catch (SecurityException e1) {
+				Class<?> modelClass = getModelClass((Class<? extends ModelDriven<?>>) processor);
+				if (modelClass == null) {
+					return null;
+				}
+				field = ReflectUtil.getChainField(modelClass, fieldName);
+			} catch (Exception e1) {
 				e1.printStackTrace();
+				return null;
 			}
 		}
 		return field.getField();
 	}
 	
 	
-	private void setParameterType(Class<? extends BaseProcessor> processor, Map<String, Parameter> parameters) {
+	private void setParameterInfo(Class<? extends BaseProcessor> processor, Map<String, Parameter> parameters) {
 		parameters.forEach((k,v)->{
-			if(StringUtil.isStringEmpty(v.getType())) {
-				Field field = getField(processor, k);
-				if (field != null) {
+			Field field = getField(processor, k);
+			if (field != null) {
+				if(StringUtil.isStringEmpty(v.getType())) {
 					v.setType(field.getType().getSimpleName());
 				}
+				setParamByAnnotion(v, field);
+			}
+			if (v.isRequire() == null) {
+				v.setRequire(Parameter.defaultRequire);
 			}
 			v.setName(k);
 		});
+	}
+
+	private void setParamByAnnotion(Parameter v, Field field) {
+		DocParam annotation = field.getAnnotation(DocParam.class);
+		if (annotation != null) {
+			if (StringUtil.isStringEmpty(v.getDesc())) {
+				v.setDesc(annotation.value());
+			}
+			if (v.getMaxLength() == -1) {
+				v.setMaxLength(annotation.maxLength());
+			}
+			if (v.getMinLength() == -1) {
+				v.setMinLength(annotation.minLength());
+			}
+			if (v.isRequire() == null) {
+				v.setRequire(annotation.require());
+			}
+		}
 	}
 }
