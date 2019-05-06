@@ -1,8 +1,5 @@
 package steed.router;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.jsoup.Jsoup;
@@ -11,18 +8,18 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Node;
 import org.jsoup.safety.Whitelist;
 
-import steed.util.base.StringUtil;
+import steed.ext.util.base.StringUtil;
 
 public class SimpleXSSCleanner implements XSSCleaner{
 	
 	/**
-	 * 允许存在<,/,>等特殊符号的参数名(富文本字段),','逗号分隔
+	 * 允许存在&lt;,/,&gt;等特殊符号的参数名(富文本字段),
 	 */
-	protected String[] allowedSpecialCharParams;
+	protected String[] allowedSpecialCharParams = new String[] {};
 	/**
-	 * 不进行xss过滤的参数名,逗号分割
+	 * 不进行xss过滤的参数名
 	 */
-	protected String[] paramNotClean;
+	protected String[] paramNotClean = new String[] {};
 	private static final String[] strNotArrow = {"^[\\s\\S]*expression([\\s\\S]*)[\\s\\S]*$","^[\\s\\S]*javascript:[\\s\\S]*$"};		
 	/**
 	 * 网站基本路径
@@ -86,7 +83,7 @@ public class SimpleXSSCleanner implements XSSCleaner{
 	 * @param str
 	 * @return
 	 */
-	private String cleanXss(String str) {
+	public String cleanXss(String str) {
 		Whitelist relaxed = Whitelist.relaxed();
 		relaxed.addAttributes(":all", "style");
 		relaxed.addAttributes(":all", "class");
@@ -125,7 +122,7 @@ public class SimpleXSSCleanner implements XSSCleaner{
 	}
 	
 	
-	private String clean(String target,boolean allowSpecialCharacter){
+	public String clean(String target,boolean allowSpecialCharacter){
 		if (StringUtil.isStringEmpty(target)) {
 			return target;
 		}

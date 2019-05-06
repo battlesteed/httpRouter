@@ -11,10 +11,10 @@ import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import steed.ext.util.logging.LoggerFactory;
 import steed.router.HttpRouter;
 import steed.router.RouterConfig;
 import steed.router.SpringHttpRouter;
-import steed.util.logging.LoggerFactory;
 
 //@EnableAutoConfiguration
 @EnableAutoConfiguration(exclude={JtaAutoConfiguration.class})

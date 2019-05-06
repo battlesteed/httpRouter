@@ -9,6 +9,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.google.gson.Gson;
 
+import steed.ext.util.base.StringUtil;
+import steed.ext.util.logging.Logger;
+import steed.ext.util.logging.LoggerFactory;
 import steed.router.HttpRouter;
 import steed.router.ModelDriven;
 import steed.router.SimpleParamterFiller;
@@ -18,9 +21,6 @@ import steed.router.api.domain.ProcessorConfig;
 import steed.router.exception.message.MessageRuntimeException;
 import steed.router.processor.BaseProcessor;
 import steed.util.AssertUtil;
-import steed.util.base.StringUtil;
-import steed.util.logging.Logger;
-import steed.util.logging.LoggerFactory;
 
 public class APIParamterFiller extends SimpleParamterFiller {
 	private static Logger logger = LoggerFactory.getLogger(APIParamterFiller.class);
@@ -72,6 +72,9 @@ public class APIParamterFiller extends SimpleParamterFiller {
 	}
 
 	private void validateParameterType(String fieldName,Parameter rule,String value) {
+		if (StringUtil.isStringEmpty(rule.getType())) {
+			return;
+		}
 		switch (rule.getType().toLowerCase()) {
 		case "long":
 		case "int":

@@ -3,18 +3,19 @@ package steed.router.processor;
 import java.io.IOException;
 import java.io.Serializable;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import steed.ext.util.base.StringUtil;
+import steed.ext.util.logging.Logger;
+import steed.ext.util.logging.LoggerFactory;
 import steed.router.HttpRouter;
 import steed.router.RouterConfig;
 import steed.router.domain.Message;
 import steed.util.AssertUtil;
-import steed.util.base.StringUtil;
-import steed.util.logging.Logger;
-import steed.util.logging.LoggerFactory;
 /**
  * 处理器,处理HttpRouter分发过来的http请求<br>
  * 若Processor中的方法返回String,HttpRouter会forward到String对应的jsp页面(若string以.jsp结尾)或直接把string内容返回给客户端,若返回其它类型的对象,则会将对象转成json写到response,
@@ -77,6 +78,53 @@ public abstract class BaseProcessor implements Serializable {
 	 */
 	protected void writeJson(Object obj){
 		writeString(RouterConfig.defaultJsonSerializer.object2Json(obj));
+	}
+	
+	/**
+	 * 往request中放东西
+	 * @param key 键
+	 * @param obj 值
+	 */
+	protected void setRequestAttribute(String key,Object obj){
+		getRequest().setAttribute(key, obj);
+	}
+	/**
+	 * 从request中取东西
+	 * @param key 键
+	 */
+	protected Object getRequestAttribute(String key){
+		return getRequest().getAttribute(key);
+	}
+	/**
+	 * 获取request中的参数
+	 * @param key 键
+	 */
+	protected String getRequestParameter(String key){
+		return getRequest().getParameter(key);
+	}
+	/**
+	 * 获取request中的参数
+	 * @param key 键
+	 */
+	protected boolean isRequestParameterEmpty(String key){
+		return StringUtil.isStringEmpty(getRequest().getParameter(key));
+	}
+	
+	protected String[] getRequestParameters(String key){
+		return getRequest().getParameterValues(key);
+	}
+	/**
+	 * 往session中放东西
+	 * @param key 键
+	 * @param obj 值
+	 */
+	protected void setSessionAttribute(String key,Object obj){
+		getSession().setAttribute(key, obj);
+	}
+	
+	protected ServletContext getServletContext() {
+		//艹，兼容Servlet2.5只能这样写
+		return getRequest().getSession().getServletContext();
 	}
 	
 	/**

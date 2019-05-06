@@ -8,9 +8,9 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import steed.ext.util.base.BaseUtil;
+import steed.ext.util.logging.LoggerFactory;
 import steed.router.test.processor.TestDontAccess;
-import steed.util.base.BaseUtil;
-import steed.util.logging.LoggerFactory;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)

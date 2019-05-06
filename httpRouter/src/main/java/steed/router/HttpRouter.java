@@ -15,6 +15,8 @@ import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import steed.ext.util.logging.Logger;
+import steed.ext.util.logging.LoggerFactory;
 import steed.hibernatemaster.Config;
 import steed.hibernatemaster.util.DaoUtil;
 import steed.hibernatemaster.util.HibernateUtil;
@@ -23,8 +25,6 @@ import steed.router.annotation.Power;
 import steed.router.domain.Message;
 import steed.router.exception.message.MessageExceptionInterface;
 import steed.router.processor.BaseProcessor;
-import steed.util.logging.Logger;
-import steed.util.logging.LoggerFactory;
 
 
 /** 
@@ -166,12 +166,12 @@ public abstract class HttpRouter{
     
     public void forward(HttpServletRequest request, HttpServletResponse response){  
     	try {
+    		requestThreadLocal.set(new XSSCleanRequestWrapper(request));
+    		responseThreadLocal.set(response);
     		if (RouterConfig.devMode) {
 				printParam(request);
 				logger.debug("请求url--->%s", request.getRequestURL());
 			}
-			requestThreadLocal.set(new XSSCleanRequestWrapper(request));
-			responseThreadLocal.set(response);
 			try {
 				forwardNow(request, response);
 			} catch (IOException | ServletException e) {

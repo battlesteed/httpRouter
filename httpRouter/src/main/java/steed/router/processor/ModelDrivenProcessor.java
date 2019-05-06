@@ -8,8 +8,6 @@ public abstract class ModelDrivenProcessor<SteedDomain> extends BaseProcessor im
 	
 	protected SteedDomain domain;
 	
-	protected void afterDomainCreate(SteedDomain domain){}
-
 	/**
 	 * 通过泛型获取action对应的model
 	 * @return
@@ -20,6 +18,9 @@ public abstract class ModelDrivenProcessor<SteedDomain> extends BaseProcessor im
 		}
 		Class<SteedDomain> clazz = getModelClass(); 
 		try {
+			if (clazz == null) {
+				return null;
+			}
 			domain = clazz.newInstance();
 			return domain;
 		} catch (InstantiationException | IllegalAccessException e) {

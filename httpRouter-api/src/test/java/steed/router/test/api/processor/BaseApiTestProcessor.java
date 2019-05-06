@@ -2,11 +2,11 @@ package steed.router.test.api.processor;
 
 import org.junit.Assert;
 
+import steed.ext.util.base.StringUtil;
 import steed.hibernatemaster.domain.BaseRelationalDatabaseDomain;
 import steed.hibernatemaster.util.DaoUtil;
 import steed.router.domain.Message;
 import steed.router.processor.ModelDrivenProcessor;
-import steed.util.base.StringUtil;
 
 public class BaseApiTestProcessor<T extends BaseRelationalDatabaseDomain> extends ModelDrivenProcessor<T>{
 	private String sign;

@@ -9,11 +9,11 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 
+import steed.ext.util.logging.Logger;
+import steed.ext.util.logging.LoggerFactory;
 import steed.router.annotation.DontAccess;
 import steed.router.annotation.Path;
 import steed.router.processor.BaseProcessor;
-import steed.util.logging.Logger;
-import steed.util.logging.LoggerFactory;
 
 public class SpringProcessorScanner implements ProcessorScanner{
 	private static Logger logger = LoggerFactory.getLogger(SpringProcessorScanner.class);

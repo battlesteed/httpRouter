@@ -1,8 +1,8 @@
 package steed.util;
 
+import steed.ext.util.base.StringUtil;
 import steed.router.domain.Message;
 import steed.router.exception.message.MessageRuntimeException;
-import steed.util.base.StringUtil;
 
 public class AssertUtil {
 	

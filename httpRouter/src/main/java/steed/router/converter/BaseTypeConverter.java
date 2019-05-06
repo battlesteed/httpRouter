@@ -4,9 +4,9 @@ import java.lang.reflect.Field;
 
 import javax.servlet.http.HttpServletRequest;
 
-import steed.util.logging.Logger;
-import steed.util.logging.LoggerFactory;
-import steed.util.reflect.ReflectUtil;
+import steed.ext.util.logging.Logger;
+import steed.ext.util.logging.LoggerFactory;
+import steed.ext.util.reflect.ReflectUtil;
 
 public class BaseTypeConverter implements ParamterConverter{
 //	public static Class<?>[] baseTypeClass = new Class<?>[] {Byte.class,Short.class,Integer.class,Float.class,Boolean.class,Character.class,Double.class ,Long.class};

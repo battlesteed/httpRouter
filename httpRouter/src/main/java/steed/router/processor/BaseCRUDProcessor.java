@@ -1,26 +1,21 @@
 package steed.router.processor;
 
 import java.io.Serializable;
-
 import java.lang.reflect.Field;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
+import steed.ext.util.base.DomainUtil;
+import steed.ext.util.base.StringUtil;
+import steed.ext.util.reflect.ReflectUtil;
 import steed.hibernatemaster.domain.BaseDatabaseDomain;
 import steed.hibernatemaster.domain.BaseDomain;
 import steed.hibernatemaster.domain.Page;
 import steed.hibernatemaster.util.DaoUtil;
-import steed.router.HttpRouter;
 import steed.router.domain.Message;
-import steed.util.base.DomainUtil;
-import steed.util.base.StringUtil;
-import steed.util.reflect.ReflectUtil;
 
 public class BaseCRUDProcessor<SteedDomain extends BaseDatabaseDomain> extends ModelDrivenProcessor<SteedDomain> {
 	private static final long serialVersionUID = 7774350640186420795L;
@@ -40,54 +35,13 @@ public class BaseCRUDProcessor<SteedDomain extends BaseDatabaseDomain> extends M
 	 */
 	protected int pageSize = defaultPageSize;
 	
+	/**
+	 * 操作名称,"修改","删除","添加"等,若事务提交成功,则会自动返回 operationName + "成功!"给客户端,否则返回 operationName + "失败!"
+	 */
+	protected String operationName;
+	
 	public void setCurrentPage(int currentPage) {
 		this.currentPage = currentPage;
-	}
-	/**
-	 * 往request中放东西
-	 * @param key 键
-	 * @param obj 值
-	 */
-	protected void setRequestAttribute(String key,Object obj){
-		getRequest().setAttribute(key, obj);
-	}
-	/**
-	 * 从request中取东西
-	 * @param key 键
-	 */
-	protected Object getRequestAttribute(String key){
-		return getRequest().getAttribute(key);
-	}
-	/**
-	 * 获取request中的参数
-	 * @param key 键
-	 */
-	protected String getRequestParameter(String key){
-		return getRequest().getParameter(key);
-	}
-	/**
-	 * 获取request中的参数
-	 * @param key 键
-	 */
-	protected boolean isRequestParameterEmpty(String key){
-		return StringUtil.isStringEmpty(getRequest().getParameter(key));
-	}
-	
-	protected String[] getRequestParameters(String key){
-		return getRequest().getParameterValues(key);
-	}
-	/**
-	 * 往session中放东西
-	 * @param key 键
-	 * @param obj 值
-	 */
-	protected void setSessionAttribute(String key,Object obj){
-		getSession().setAttribute(key, obj);
-	}
-	
-	protected ServletContext getServletContext() {
-		//艹，兼容Servlet2.5只能这样写
-		return getRequest().getSession().getServletContext();
 	}
 	
 	/**
@@ -97,6 +51,7 @@ public class BaseCRUDProcessor<SteedDomain extends BaseDatabaseDomain> extends M
 	protected void setRequestPage(Page page){
 		setRequestAttribute("page", page);
 	}
+	
 	protected void setRequestDomainList(List list){
 		setRequestAttribute("domainList", list);
 	}
@@ -280,21 +235,11 @@ public class BaseCRUDProcessor<SteedDomain extends BaseDatabaseDomain> extends M
 		model.updateNotNullField(updateEvenNull,strictlyMode);
 		return null;
 	}
+	
 	@Override
 	public void afterAction(String methodName) {
 		super.afterAction(methodName);
-		String operation = null;
-		switch (methodName) {
-		case "save":
-			operation = "添加";
-			break;
-		case "delete":
-			operation = "删除";
-			break;
-		case "update":
-			operation = "修改";
-			break;
-		}
+		String operation = getOperationName(methodName);
 		if (operation != null) {
 			boolean managTransaction = DaoUtil.managTransaction();
 			if (managTransaction) {
@@ -304,6 +249,21 @@ public class BaseCRUDProcessor<SteedDomain extends BaseDatabaseDomain> extends M
 			}
 		}
 		
+	}
+	
+	protected String getOperationName(String methodName) {
+		if (!StringUtil.isStringEmpty(operationName)) {
+			return operationName;
+		}
+		switch (methodName) {
+		case "save":
+			return "添加";
+		case "delete":
+			return "删除";
+		case "update":
+			return "修改";
+		}
+		return "";
 	}
 	
 	

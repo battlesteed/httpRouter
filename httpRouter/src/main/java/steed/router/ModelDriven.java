@@ -1,6 +1,7 @@
 package steed.router;
 
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 
 public interface ModelDriven<T> {
     T getModel();
@@ -12,7 +13,11 @@ public interface ModelDriven<T> {
     default void onModelReady(T t) {};
     
     default Class<T> getModelClass() {
-		ParameterizedType parameterizedType = (ParameterizedType)getClass().getGenericSuperclass();
+		Type genericSuperclass = getClass().getGenericSuperclass();
+		if (!(genericSuperclass instanceof ParameterizedType)) {
+			return null;
+		}
+		ParameterizedType parameterizedType = (ParameterizedType)genericSuperclass;
 		Class<T> clazz = (Class<T>) (parameterizedType.getActualTypeArguments()[0]);
 		return clazz;
 	}

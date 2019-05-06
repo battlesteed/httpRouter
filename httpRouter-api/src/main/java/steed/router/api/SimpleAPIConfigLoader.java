@@ -13,19 +13,19 @@ import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 
+import steed.ext.util.base.BaseUtil;
+import steed.ext.util.base.PathUtil;
+import steed.ext.util.base.StringUtil;
+import steed.ext.util.logging.Logger;
+import steed.ext.util.logging.LoggerFactory;
+import steed.ext.util.reflect.ReflectResult;
+import steed.ext.util.reflect.ReflectUtil;
 import steed.router.ModelDriven;
 import steed.router.annotation.Path;
 import steed.router.api.annotation.DocParam;
 import steed.router.api.domain.Parameter;
 import steed.router.api.domain.ProcessorConfig;
 import steed.router.processor.BaseProcessor;
-import steed.util.base.BaseUtil;
-import steed.util.base.PathUtil;
-import steed.util.base.StringUtil;
-import steed.util.logging.Logger;
-import steed.util.logging.LoggerFactory;
-import steed.util.reflect.ReflectResult;
-import steed.util.reflect.ReflectUtil;
 
 public class SimpleAPIConfigLoader implements APIConfigLoader {
 	private static Logger logger = LoggerFactory.getLogger(APIParamterFiller.class);
@@ -40,6 +40,7 @@ public class SimpleAPIConfigLoader implements APIConfigLoader {
 		return configCache;
 	}
 
+	@SuppressWarnings("unchecked")
 	private Map<String, Parameter> loadConfig(Class<? extends BaseProcessor> processor) {
 		Map<String, Parameter> fatherParameter = new HashMap<String, Parameter>();
 		if(configCache.get(processor) != null) {
@@ -122,6 +123,9 @@ public class SimpleAPIConfigLoader implements APIConfigLoader {
 				e1.printStackTrace();
 				return null;
 			}
+		}
+		if (field == null) {
+			return null;
 		}
 		return field.getField();
 	}
