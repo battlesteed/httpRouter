@@ -32,6 +32,7 @@ import steed.util.AssertUtil;
  *  </ul>
  * @author battlesteed
  * @see steed.router.annotation.DontAccess
+ * @see #steed_forward
  *
  */
 public abstract class BaseProcessor implements Serializable {
@@ -55,8 +56,9 @@ public abstract class BaseProcessor implements Serializable {
 	/**
 	 * Processor开始处理完请求后会执行该方法
 	 * @param methodName Processor即将被http访问到的方法名
+	 * @param returnValue Processor方法返回值,若方法为void,则该值为null
 	 */
-	public void afterAction(String methodName) {
+	public void afterAction(String methodName,Object returnValue) {
 		
 	}
 	

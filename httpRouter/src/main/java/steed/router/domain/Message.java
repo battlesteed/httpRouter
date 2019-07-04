@@ -49,6 +49,24 @@ public class Message extends BaseDomain{
 	public Message(String message) {
 		this(statusCodeSuccess, message);
 	}
+	
+	public Message(Object content) {
+		this();
+		this.content = content;
+	}
+	
+	public Message(String message, Object content) {
+		this(message);
+		this.content = content;
+	}
+	
+	public Message(Integer statusCode, String message, Object content) {
+		super();
+		this.statusCode = statusCode;
+		this.message = message;
+		this.content = content;
+	}
+
 	public Message(Integer statusCode, String message) {
 		this.statusCode = statusCode;
 		this.message = message;

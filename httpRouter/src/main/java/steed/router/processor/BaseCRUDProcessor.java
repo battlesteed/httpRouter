@@ -6,8 +6,6 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
-
 import steed.ext.util.base.DomainUtil;
 import steed.ext.util.base.StringUtil;
 import steed.ext.util.reflect.ReflectUtil;
@@ -177,7 +175,7 @@ public class BaseCRUDProcessor<SteedDomain extends BaseDatabaseDomain> extends M
 	 * 	并以json格式返回删除状态（成功与否）到前端，
 	 *
 	 */
-	public void delete(){
+	protected void delete(){
 		BaseDatabaseDomain model = (BaseDatabaseDomain) getModel();
 		model.delete();
 	}
@@ -186,7 +184,7 @@ public class BaseCRUDProcessor<SteedDomain extends BaseDatabaseDomain> extends M
 	 * 把model保存到数据库，
 	 * 并以json格式返回保存状态（成功与否）到前端,
 	 */
-	public void save(){
+	protected void save(){
 		 saveDomain();
 	}
 	
@@ -202,7 +200,7 @@ public class BaseCRUDProcessor<SteedDomain extends BaseDatabaseDomain> extends M
 	 *	你只需在jsp页面读取domain中的数据并显示出来让用户编辑即可
 	 * @return steed_forward
 	 */
-	public String edit(){
+	protected String edit(){
 		getDomainAndSet2Request();
 		return steed_forward;
 	}
@@ -212,7 +210,7 @@ public class BaseCRUDProcessor<SteedDomain extends BaseDatabaseDomain> extends M
 	 * 
 	 * @see #updateNotNullField
 	 */
-	public String update(){
+	protected String update(){
 		((BaseDatabaseDomain)getModel()).update();
 		return null;
 	}
@@ -221,7 +219,7 @@ public class BaseCRUDProcessor<SteedDomain extends BaseDatabaseDomain> extends M
 	 * 你可能需要steed.action.BaseAction.update()
 	 * @return null
 	 */
-	public String updateNotNullField(){
+	protected String updateNotNullField(){
 		return updateNotNullField(null);
 	}
 	
@@ -237,18 +235,24 @@ public class BaseCRUDProcessor<SteedDomain extends BaseDatabaseDomain> extends M
 	}
 	
 	@Override
-	public void afterAction(String methodName) {
-		super.afterAction(methodName);
+	public void afterAction(String methodName,Object returnValue) {
+		super.afterAction(methodName, returnValue);
+		if (returnValue != null) {
+			return;
+		}
 		String operation = getOperationName(methodName);
 		if (operation != null) {
-			boolean managTransaction = DaoUtil.managTransaction();
-			if (managTransaction) {
+			if (isTransactionSuccessful()) {
 				writeJson(new Message(operation+"成功!"));
 			}else {
 				writeJson(new Message(Message.statusCode_UnknownError,operation+"失败"));
 			}
 		}
 		
+	}
+
+	protected boolean isTransactionSuccessful() {
+		return DaoUtil.managTransaction();
 	}
 	
 	protected String getOperationName(String methodName) {

@@ -112,9 +112,6 @@ public abstract class HttpRouter{
 		logger.debug("返回给客户端内容----->"+string);
 	}
     
-    
-   
-    
     protected boolean shouldReturnJsonMessage(Exception e,HttpServletRequest request, HttpServletResponse response) {
     	return "XMLHttpRequest".equalsIgnoreCase(request.getHeader("X-Requested-With"));
     }
@@ -204,6 +201,11 @@ public abstract class HttpRouter{
 		
 		try {
 			Method method = processor.getMethod(methodName);
+			if (method.getDeclaringClass() != processor) {
+				logger.error("方法%s为父类方法,不允许通过http调用,若要重写,请在子类重写该方法!",method.toString());
+				response.sendError(RouterConfig.FORBIDDEN_STATUS_CODE);
+				return;
+			}
 			if (methodName.startsWith("set") || methodName.startsWith("get") 
 					|| method.getAnnotation(DontAccess.class) != null
 					|| Modifier.isStatic(method.getModifiers())) {
@@ -228,7 +230,7 @@ public abstract class HttpRouter{
 				
 				newInstance.beforeAction(methodName);
 				Object invoke = method.invoke(newInstance);
-				newInstance.afterAction(methodName);
+				newInstance.afterAction(methodName, invoke);
 				
 				if (invoke != null) {
 					if (invoke instanceof String) {

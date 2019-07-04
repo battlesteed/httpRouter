@@ -31,7 +31,6 @@ public class XSSCleanRequestWrapper extends HttpServletRequestWrapper{
 		initedMap = true;
 		return map;
 	}
-	
 
 	@Override
 	public String getParameter(String name) {

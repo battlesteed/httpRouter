@@ -179,7 +179,12 @@ public class SimpleParamterFiller implements ParameterFiller{
     }
     
     private Method getSetterMethod(Field field, Class<?> target) {
-		return getMethod(target, StringUtil.getFieldSetterName(field.getName()), true,field.getType());
+    	Class<?> type = field.getType();
+    	Method method = getMethod(target, StringUtil.getFieldSetterName(field.getName()), true,type);
+//		if (method == null && type.isArray()) {
+//			method = getMethod(target, StringUtil.getFieldSetterName(field.getName()), true, String.class);
+//		}
+		return method;
 	}
     
     private static final Map<String, Method> methodCache = new HashMap<>();
