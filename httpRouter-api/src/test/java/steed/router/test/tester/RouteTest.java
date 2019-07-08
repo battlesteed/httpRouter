@@ -46,16 +46,16 @@ public class RouteTest {
 		
 		testNow("/test/getModel", HttpStatus.NOT_FOUND);
 		
-		testNow("/test/testDontAccess",HttpStatus.NOT_FOUND);
+		testNow("/test/testDontAccess", HttpStatus.NOT_FOUND);
 		
-		testNow("/test/testStaticMethod",HttpStatus.NOT_FOUND);
+		testNow("/test/testStaticMethod", HttpStatus.NOT_FOUND);
 		
-		testNow("/test/testStatic",HttpStatus.NOT_FOUND);
+		testNow("/test/testStatic", HttpStatus.NOT_FOUND);
 		
-		testNow("/testDontAccess/a1214232refdsf",HttpStatus.NOT_FOUND);
+		testNow("/testDontAccess/a1214232refdsf", HttpStatus.NOT_FOUND);
 	}
 	
-	private void testNow(String url,HttpStatus status) {
+	private void testNow(String url, HttpStatus status) {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 		ResponseEntity<String> entity = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<Void>(headers),String.class);

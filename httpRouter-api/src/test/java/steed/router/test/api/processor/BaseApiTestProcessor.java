@@ -18,9 +18,9 @@ public class BaseApiTestProcessor<T extends BaseRelationalDatabaseDomain> extend
 	}
 
 	@Override
-	public void afterAction(String methodName) {
+	public void afterAction(String methodName,Object returnValue) {
 		assertNotEmpty(sign);
-		super.afterAction(methodName);
+		super.afterAction(methodName, returnValue);
 		String operation = null;
 		switch (methodName) {
 		case "save":

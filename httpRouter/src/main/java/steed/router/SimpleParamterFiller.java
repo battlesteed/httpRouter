@@ -97,8 +97,8 @@ public class SimpleParamterFiller implements ParameterFiller{
 			throws Exception {
 		String[] split = parameterName.split("\\.");
 		Field field = null;
-		Class<?> target = container.getClass();
 		for( int i = 0; i < split.length; i++){
+			Class<?> target = container.getClass();
 			field = ReflectUtil.getField(target, split[i], false);
 			if (field == null || !canAccess(field, target)) {
 				break;
@@ -155,7 +155,7 @@ public class SimpleParamterFiller implements ParameterFiller{
 			object = field.get(target);
 			if (object == null) {
 				object = field.getType().newInstance();
-				field.set(object, target);
+				field.set(target, object);
 			}
 		} catch (IllegalArgumentException | IllegalAccessException | InstantiationException e) {
 			throw new RouterException(e);

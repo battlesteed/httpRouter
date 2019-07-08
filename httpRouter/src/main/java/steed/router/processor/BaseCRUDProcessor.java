@@ -11,6 +11,7 @@ import steed.ext.util.base.StringUtil;
 import steed.ext.util.reflect.ReflectUtil;
 import steed.hibernatemaster.domain.BaseDatabaseDomain;
 import steed.hibernatemaster.domain.BaseDomain;
+import steed.hibernatemaster.domain.BaseRelationalDatabaseDomain;
 import steed.hibernatemaster.domain.Page;
 import steed.hibernatemaster.util.DaoUtil;
 import steed.router.domain.Message;
@@ -175,7 +176,7 @@ public class BaseCRUDProcessor<SteedDomain extends BaseDatabaseDomain> extends M
 	 * 	并以json格式返回删除状态（成功与否）到前端，
 	 *
 	 */
-	protected void delete(){
+	public void delete(){
 		BaseDatabaseDomain model = (BaseDatabaseDomain) getModel();
 		model.delete();
 	}
@@ -184,7 +185,7 @@ public class BaseCRUDProcessor<SteedDomain extends BaseDatabaseDomain> extends M
 	 * 把model保存到数据库，
 	 * 并以json格式返回保存状态（成功与否）到前端,
 	 */
-	protected void save(){
+	public void save(){
 		 saveDomain();
 	}
 	
@@ -200,7 +201,7 @@ public class BaseCRUDProcessor<SteedDomain extends BaseDatabaseDomain> extends M
 	 *	你只需在jsp页面读取domain中的数据并显示出来让用户编辑即可
 	 * @return steed_forward
 	 */
-	protected String edit(){
+	public String edit(){
 		getDomainAndSet2Request();
 		return steed_forward;
 	}
@@ -210,7 +211,7 @@ public class BaseCRUDProcessor<SteedDomain extends BaseDatabaseDomain> extends M
 	 * 
 	 * @see #updateNotNullField
 	 */
-	protected String update(){
+	public String update(){
 		((BaseDatabaseDomain)getModel()).update();
 		return null;
 	}
@@ -219,18 +220,18 @@ public class BaseCRUDProcessor<SteedDomain extends BaseDatabaseDomain> extends M
 	 * 你可能需要steed.action.BaseAction.update()
 	 * @return null
 	 */
-	protected String updateNotNullField(){
+	public String updateNotNullField(){
 		return updateNotNullField(null);
 	}
 	
-	protected String updateNotNullField(List<String> updateEvenNull){
+	public String updateNotNullField(List<String> updateEvenNull){
 		updateNotNullField(updateEvenNull, true);
 		return null;
 	}
 	
-	protected String updateNotNullField(List<String> updateEvenNull,boolean strictlyMode){
-		BaseDatabaseDomain model = (BaseDatabaseDomain) getModel();
-		model.updateNotNullField(updateEvenNull,strictlyMode);
+	public String updateNotNullField(List<String> updateEvenNull,boolean strictlyMode){
+		BaseRelationalDatabaseDomain model = (BaseRelationalDatabaseDomain) getModel();
+		model.updateNotNullFieldByHql(updateEvenNull, strictlyMode);
 		return null;
 	}
 	
@@ -255,6 +256,11 @@ public class BaseCRUDProcessor<SteedDomain extends BaseDatabaseDomain> extends M
 		return DaoUtil.managTransaction();
 	}
 	
+	/**
+	 * 获取java方法对应的操作名字
+	 * @param methodName http请求调用的Processor方法名
+	 * @return 操作名字
+	 */
 	protected String getOperationName(String methodName) {
 		if (!StringUtil.isStringEmpty(operationName)) {
 			return operationName;

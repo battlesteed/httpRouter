@@ -240,6 +240,9 @@ public abstract class HttpRouter{
 						}
 						if (jsp.endsWith(".jsp")) {
 							logger.debug("forward到%s",jsp);
+							if (!jsp.startsWith("/")) {
+								jsp = mergePath(RouterConfig.jspPath, parentPath + jsp);
+							}
 							request.getRequestDispatcher(jsp).forward(request, response);;
 						}else {
 							writeString(jsp, request, response);

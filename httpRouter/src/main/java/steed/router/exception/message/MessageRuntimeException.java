@@ -6,7 +6,6 @@ public class MessageRuntimeException extends RuntimeException implements Message
 	private static final long serialVersionUID = -4230494067186876199L;
 	private Message msg;
 	public MessageRuntimeException() {
-		
 	}
 
 	public MessageRuntimeException(Message msg) {
@@ -39,11 +38,14 @@ public class MessageRuntimeException extends RuntimeException implements Message
 		
 	}
 	public MessageRuntimeException(Throwable cause) {
-		super(cause);
+		this("系统繁忙", cause);
 	}
 	
 	@Override
 	public Message getMsg() {
+		if (msg == null) {
+			msg = new Message(Message.statusCode_UnknownError, getMessage());
+		}
 		return msg;
 	}
 	@Override
