@@ -88,6 +88,9 @@ public class SimpleParamterFiller implements ParameterFiller{
     	Enumeration<String> parameterNames = request.getParameterNames();
 		while (parameterNames.hasMoreElements()) {
 			String parameterName = parameterNames.nextElement();
+			if (StringUtil.isStringEmpty(request.getParameter(parameterName))) {
+				continue;
+			}
 			singleParamters2Data(container, request, parameterName);
 		}
 		

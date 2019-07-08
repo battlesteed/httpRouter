@@ -1,13 +1,11 @@
 package steed.router;
 
-import javax.servlet.http.HttpServletRequestWrapper;
-
 import com.google.gson.Gson;
 
 public class RouterConfig {
 	public static boolean devMode = false;
 	public final static String steed_forward = "steed_forward";
-	public final static String message_page = "message.jsp";
+	public static String message_page = "message.jsp";
 	/**
 	 * 放到request域的异常key
 	 */
