@@ -15,6 +15,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import steed.ext.util.base.StringUtil;
 import steed.ext.util.logging.Logger;
 import steed.ext.util.logging.LoggerFactory;
 import steed.hibernatemaster.Config;
@@ -124,12 +125,16 @@ public abstract class HttpRouter{
 				logger.debug("抛出异常提示:",e);
 			}
 		}else {
-			message = new Message(Message.statusCode_UnknownError, "系统繁忙!");
-			if (RouterConfig.devMode) {
+			message = new Message(Message.statusCode_UnknownError, RouterConfig.defaultErrorMessage);
+			if (RouterConfig.devMode && !StringUtil.isStringEmpty(e.getMessage())) {
+				//开发模式直接提示异常信息
 				message.setMessage(e.getMessage());
 			}
 			logger.error("发生未知错误!",e);
 		}
+//    	if (StringUtil.isStringEmpty(message.getMessage())) {
+//			message.setMessage(RouterConfig.defaultErrorMessage);
+//		}
     	if (shouldReturnJsonMessage(e, request, response)) {
 			writeJsonMessage(message, request, response);
 		}else {

@@ -4,6 +4,10 @@ import com.google.gson.Gson;
 
 public class RouterConfig {
 	public static boolean devMode = false;
+	/**
+	 * 默认的错误提示,代码抛出未处理的异常时的提示消息
+	 */
+	public static String defaultErrorMessage = "系统繁忙";
 	public final static String steed_forward = "steed_forward";
 	public static String message_page = "message.jsp";
 	/**
