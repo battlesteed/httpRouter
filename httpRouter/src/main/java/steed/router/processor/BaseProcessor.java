@@ -79,6 +79,7 @@ public abstract class BaseProcessor implements Serializable {
 	 * @param obj 要输出的对象
 	 */
 	protected void writeJson(Object obj){
+		getResponse().setHeader("Content-Type", "application/json");
 		writeString(RouterConfig.defaultJsonSerializer.object2Json(obj));
 	}
 	
