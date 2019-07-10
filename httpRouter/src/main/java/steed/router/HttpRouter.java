@@ -168,7 +168,8 @@ public abstract class HttpRouter{
     
     public void forward(HttpServletRequest request, HttpServletResponse response){  
     	try {
-    		requestThreadLocal.set(new XSSCleanRequestWrapper(request));
+    		request = new XSSCleanRequestWrapper(request);
+    		requestThreadLocal.set(request);
     		responseThreadLocal.set(response);
     		if (RouterConfig.devMode) {
 				printParam(request);
