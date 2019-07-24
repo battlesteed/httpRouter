@@ -5,6 +5,10 @@ import com.google.gson.Gson;
 public class RouterConfig {
 	public static boolean devMode = false;
 	/**
+	 * jsp存放目录
+	 */
+	public static String baseJspPath = "/WEB-INF/jsp/";
+	/**
 	 * 默认的错误提示,代码抛出未处理的异常时的提示消息
 	 */
 	public static String defaultErrorMessage = "系统繁忙";
@@ -19,15 +23,13 @@ public class RouterConfig {
 	 */
 	public final static String messageAttributeKey = "exMessage";
 	
-	public static int NOT_FOUND_StATUS_CODE = 404;
+	public static int NOT_FOUND_STATUS_CODE = 404;
 	/**
 	 * 安全问题,不用403,否则类名,字段名,方法名等会被扫描到
 	 */
 	public static int FORBIDDEN_STATUS_CODE = 404;
 	
 	public static String charset = "UTF-8";
-	
-	public static String jspPath = "/WEB-INF/jsp/";
 	
 	public static JsonSerializer defaultJsonSerializer = (obj)->{ return new Gson().toJson(obj);};
 	

@@ -165,7 +165,6 @@ public class SimpleDocumentGenerator implements DocumentGenerator{
 			//logger.debug("生成文档-->\n"+sb);
 			return sb;
 		} catch (IOException e) {
-			e.printStackTrace();
 			throw new RuntimeException("读取processor模板文件失败!",e);
 		}finally {
 			if (bufferedReader != null) {

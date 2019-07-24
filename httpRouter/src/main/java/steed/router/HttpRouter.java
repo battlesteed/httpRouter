@@ -141,7 +141,7 @@ public abstract class HttpRouter{
 			try {
 				request.setAttribute(RouterConfig.exceptionAttributeKey, e);
 				request.setAttribute(RouterConfig.messageAttributeKey, RouterConfig.messageAttributeKey);
-				request.getRequestDispatcher(mergePath(RouterConfig.jspPath, RouterConfig.message_page)).forward(request, response);
+				request.getRequestDispatcher(mergePath(RouterConfig.baseJspPath, RouterConfig.message_page)).forward(request, response);
 			} catch (ServletException | IOException e1) {
 				logger.error("跳转消息提示页出错!",e);
 			}
@@ -242,12 +242,12 @@ public abstract class HttpRouter{
 					if (invoke instanceof String) {
 						String jsp = (String) invoke;
 						if (RouterConfig.steed_forward.equals(invoke)) {
-							jsp = mergePath(RouterConfig.jspPath, parentPath+methodName+".jsp");
+							jsp = mergePath(RouterConfig.baseJspPath, parentPath+methodName+".jsp");
 						}
 						if (jsp.endsWith(".jsp")) {
 							logger.debug("forward到%s",jsp);
 							if (!jsp.startsWith("/")) {
-								jsp = mergePath(RouterConfig.jspPath, parentPath + jsp);
+								jsp = mergePath(RouterConfig.baseJspPath, parentPath + jsp);
 							}
 							request.getRequestDispatcher(jsp).forward(request, response);;
 						}else {
@@ -273,7 +273,7 @@ public abstract class HttpRouter{
 			}
 		} catch (NoSuchMethodException | SecurityException e) {
 			logger.warn("在%s中未找到public的 %s 方法!",processor.getName(),methodName);
-			response.sendError(RouterConfig.NOT_FOUND_StATUS_CODE);
+			response.sendError(RouterConfig.NOT_FOUND_STATUS_CODE);
 			return;
 		}
     }
@@ -294,11 +294,12 @@ public abstract class HttpRouter{
 		}*/
 		return processor.newInstance();
 	}
+	
 	private Class<? extends BaseProcessor> getProcessor(HttpServletResponse response, String parentPath) throws IOException {
 		Class<? extends BaseProcessor> processor = pathProcessor.get(parentPath);
 		if (processor == null) {
 			logger.warn("未找到path为 %s 的Processor!", parentPath);
-			response.sendError(RouterConfig.NOT_FOUND_StATUS_CODE);
+			response.sendError(RouterConfig.NOT_FOUND_STATUS_CODE);
 			return null;
 		}
 		if (processor.getAnnotation(DontAccess.class) != null) {
@@ -308,6 +309,7 @@ public abstract class HttpRouter{
 		}
 		return processor;
 	}
+	
 	private String getParentPath(String requestURI) {
 		return requestURI.substring(0,requestURI.lastIndexOf("/")+1);
 	}
