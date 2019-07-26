@@ -85,11 +85,7 @@ public class SimpleXSSCleanner implements XSSCleaner{
 	 */
 	public String cleanXss(String str) {
 		Whitelist relaxed = Whitelist.relaxed();
-		relaxed.addAttributes(":all", "style");
-		relaxed.addAttributes(":all", "class");
-		relaxed.addTags("meta");
-		relaxed.addAttributes("meta", "name");
-		relaxed.addAttributes("meta", "content");
+		addWhitelist(relaxed);
 //		relaxed.addAttributes("iframe", "src");
 //		relaxed.addAttributes("iframe", "height");
 //		relaxed.addAttributes("iframe", "width");
@@ -104,6 +100,18 @@ public class SimpleXSSCleanner implements XSSCleaner{
 		
 		validateNode(doc);
 		return doc.body().html();
+	}
+
+	/**
+	 * 添加白名单
+	 * @param relaxed
+	 */
+	public void addWhitelist(Whitelist relaxed) {
+		relaxed.addAttributes(":all", "style");
+		relaxed.addAttributes(":all", "class");
+		relaxed.addTags("meta");
+		relaxed.addAttributes("meta", "name");
+		relaxed.addAttributes("meta", "content");
 	}
 	
 	private void validateNode(Node n){
