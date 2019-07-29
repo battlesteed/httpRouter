@@ -38,6 +38,12 @@ import steed.util.AssertUtil;
 public abstract class BaseProcessor implements Serializable {
 	private static Logger logger = LoggerFactory.getLogger(BaseProcessor.class);
 	private static final long serialVersionUID = 1L;
+	
+	/**
+	 * 该Processor被http访问到的方法名
+	 */
+	protected String executeMethod;
+	
 	/**
 	 *  return该值会自动forward到该方法对应的jsp页面
 	 * (例如该Processor的path是“admin”，调用的方法是"index",则对应的jsp路径为“/WEB-INF/jsp/admin/index.jsp”)

@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import steed.ext.util.base.StringUtil;
 import steed.ext.util.logging.Logger;
 import steed.ext.util.logging.LoggerFactory;
+import steed.ext.util.reflect.ReflectUtil;
 import steed.hibernatemaster.Config;
 import steed.hibernatemaster.util.DaoUtil;
 import steed.hibernatemaster.util.HibernateUtil;
@@ -233,6 +234,8 @@ public abstract class HttpRouter{
 			try {
 				BaseProcessor newInstance = newProcessor(processor);
 				paramterFiller.fillParamters2ProcessorData(newInstance, request, response);
+				
+				ReflectUtil.setValue("executeMethod", newInstance, methodName);
 				
 				newInstance.beforeAction(methodName);
 				Object invoke = method.invoke(newInstance);

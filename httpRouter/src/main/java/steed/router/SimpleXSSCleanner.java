@@ -90,12 +90,13 @@ public class SimpleXSSCleanner implements XSSCleaner{
 //		relaxed.addAttributes("iframe", "height");
 //		relaxed.addAttributes("iframe", "width");
 //		relaxed.addTags("iframe");
-		String baseUri = this.baseUri;
-		if (StringUtil.isStringEmpty(baseUri)) {
-			HttpServletRequest request = HttpRouter.getRequest();
-			baseUri = request.getScheme()+"://"+ request.getServerName() +":"+ request.getServerPort() + request.getContextPath()+"/";
-		}
-		String clean = Jsoup.clean(str, "",relaxed);
+		/*
+		 * String baseUri = this.baseUri; if (StringUtil.isStringEmpty(baseUri)) {
+		 * HttpServletRequest request = HttpRouter.getRequest(); baseUri =
+		 * request.getScheme()+"://"+ request.getServerName() +":"+
+		 * request.getServerPort() + request.getContextPath()+"/"; }
+		 */
+		String clean = Jsoup.clean(str, relaxed);
 		Document doc = Jsoup.parse(clean);
 		
 		validateNode(doc);
