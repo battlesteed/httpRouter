@@ -30,7 +30,7 @@ import steed.router.processor.BaseProcessor;
 public class SimpleAPIConfigLoader implements APIConfigLoader {
 	private static Logger logger = LoggerFactory.getLogger(APIParamterFiller.class);
 	
-	private static Map<Class<? extends BaseProcessor>, ProcessorConfig> configCache = new HashMap<Class<? extends BaseProcessor>, ProcessorConfig>();
+	public static Map<Class<? extends BaseProcessor>, ProcessorConfig> configCache = new HashMap<Class<? extends BaseProcessor>, ProcessorConfig>();
 	
 	@Override
 	public Map<Class<? extends BaseProcessor>, ProcessorConfig> loadProcessorsConfig(Map<String, Class<? extends BaseProcessor>> pathProcessor) {
@@ -79,7 +79,7 @@ public class SimpleAPIConfigLoader implements APIConfigLoader {
 	}
 	
 
-	private void setPath(Class<? extends BaseProcessor> processor, ProcessorConfig fromJson) {
+	protected void setPath(Class<? extends BaseProcessor> processor, ProcessorConfig fromJson) {
 		if (StringUtil.isStringEmpty(fromJson.getPath())) {
 			Path annotation = processor.getAnnotation(Path.class);
 			if (annotation != null) {
@@ -88,7 +88,7 @@ public class SimpleAPIConfigLoader implements APIConfigLoader {
 		}
 	}
 
-	private void mergeMap(Map<String, Parameter> source, String[] removeParameters, Map<String, Parameter> target) {
+	protected void mergeMap(Map<String, Parameter> source, String[] removeParameters, Map<String, Parameter> target) {
 		source.entrySet().forEach((parameter) -> {
 			if (!target.containsKey(parameter.getKey())) {
 				target.putIfAbsent(parameter.getKey(), parameter.getValue());
@@ -101,7 +101,7 @@ public class SimpleAPIConfigLoader implements APIConfigLoader {
 		}
 	}
 	
-	private Class<?> getModelClass(Class<? extends ModelDriven<?>> clazz) {
+	protected Class<?> getModelClass(Class<? extends ModelDriven<?>> clazz) {
 			ParameterizedType parameterizedType = (ParameterizedType)clazz.getGenericSuperclass();
 		Type type = parameterizedType.getActualTypeArguments()[0];
 		if (type instanceof Class<?>) {
@@ -110,7 +110,7 @@ public class SimpleAPIConfigLoader implements APIConfigLoader {
 		return null;
 	}
 
-	private Field getField(Class<? extends BaseProcessor> processor, String fieldName) {
+	protected Field getField(Class<? extends BaseProcessor> processor, String fieldName) {
 		ReflectResult field = ReflectUtil.getChainField(processor, fieldName);
 		if (field == null && ModelDriven.class.isAssignableFrom(processor)) {
 			try {
@@ -131,7 +131,7 @@ public class SimpleAPIConfigLoader implements APIConfigLoader {
 	}
 	
 	
-	private void setParameterInfo(Class<? extends BaseProcessor> processor, Map<String, Parameter> parameters) {
+	protected void setParameterInfo(Class<? extends BaseProcessor> processor, Map<String, Parameter> parameters) {
 		parameters.forEach((k,v)->{
 			Field field = getField(processor, k);
 			if (field != null) {
@@ -147,7 +147,7 @@ public class SimpleAPIConfigLoader implements APIConfigLoader {
 		});
 	}
 
-	private void setParamByAnnotion(Parameter v, Field field) {
+	protected void setParamByAnnotion(Parameter v, Field field) {
 		DocParam annotation = field.getAnnotation(DocParam.class);
 		if (annotation != null) {
 			if (StringUtil.isStringEmpty(v.getDesc())) {

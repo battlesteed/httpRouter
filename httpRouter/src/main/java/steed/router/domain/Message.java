@@ -1,5 +1,8 @@
 package steed.router.domain;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import steed.hibernatemaster.domain.BaseDomain;
 /**
  * 前端提示消息实体类
@@ -92,6 +95,26 @@ public class Message extends BaseDomain{
 	
 	public boolean isSuccess() {
 		return statusCode == statusCodeSuccess;
+	}
+	
+	/**
+	 * 往content添加数据,调用该方法之前必须保证content为null或Map<String, Object>,如下写法<pre>{@code
+	 * new Message().addContent("foo", 1).addContent("bar", "bar321");
+	 * }</pre>
+	 * @param key
+	 * @param value
+	 * @return this,方便做链式写法
+	 */
+	public Message addContent(String key,Object value) {
+		getContentMap().put(key, value);
+		return this;
+	}
+	
+	private Map<String, Object> getContentMap(){
+		if (content == null) {
+			content = new HashMap<String, Object>();
+		}
+		return (Map<String, Object>) content;
 	}
 	
 }

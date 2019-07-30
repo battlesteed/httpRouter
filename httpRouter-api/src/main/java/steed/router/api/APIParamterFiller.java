@@ -33,7 +33,7 @@ public class APIParamterFiller extends SimpleParamterFiller {
 		super();
 		this.router = router;
 		Map<String, Class<? extends BaseProcessor>> pathProcessor = router.getPathProcessor();
-		configCache = new SimpleAPIConfigLoader().loadProcessorsConfig(pathProcessor);
+		configCache = RouterApiConfig.APIConfigLoader.loadProcessorsConfig(pathProcessor);
 		logger.debug("API配置加载完成:%s",new Gson().toJson(configCache));
 	}
 	

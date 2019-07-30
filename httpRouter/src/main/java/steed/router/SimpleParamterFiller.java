@@ -29,7 +29,7 @@ import steed.router.processor.BaseProcessor;
  */
 public class SimpleParamterFiller implements ParameterFiller{
 	private static LinkedHashMap<Class<?>, ParamterConverter> paramterConverterMap = new LinkedHashMap<>();
-	private static final Logger logger =LoggerFactory.getLogger(SimpleParamterFiller.class);
+	private static final Logger logger = LoggerFactory.getLogger(SimpleParamterFiller.class);
 	private static final BaseTypeConverter baseTypeConverter = new BaseTypeConverter();
 	
 	/**
