@@ -105,7 +105,7 @@ public class Message extends BaseDomain{
 	}
 	
 	/**
-	 * 往content添加数据,调用该方法之前必须保证content为null或Map<String, Object>,如下写法<pre>{@code
+	 * 往content添加数据,调用该方法之前必须保证content为null或Map&lt;String, Object&gt;,如下写法<pre>{@code
 	 * new Message().addContent("foo", 1).addContent("bar", "bar321");
 	 * }</pre>
 	 * @param key

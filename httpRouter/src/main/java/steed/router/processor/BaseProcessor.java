@@ -179,7 +179,7 @@ public abstract class BaseProcessor implements Serializable {
 	 * 更加简洁的数据校验方法,若 asserted为空或null ,则会抛出 new MessageRuntimeException(statusCode, message);
 	 * 框架会自动把相关信息转成json返回给客户端
 	 * 
-	 * @param yourAssert
+	 * @param asserted
 	 * @param message    
 	 * @param statusCode
 	 */
@@ -191,7 +191,7 @@ public abstract class BaseProcessor implements Serializable {
 	 * 更加简洁的数据校验方法,若 asserted为空或null ,则会抛出 new MessageRuntimeException({@link Message#statusCode_MessageExecption}, message);
 	 * 框架会自动把相关信息转成json返回给客户端
 	 * 
-	 * @param yourAssert
+	 * @param asserted
 	 * @param message    
 	 */
 	public void assertNotEmpty(String asserted, String message) {
@@ -202,9 +202,8 @@ public abstract class BaseProcessor implements Serializable {
 	 * 更加简洁的数据校验方法,若 asserted不为空且不为null ,则会抛出 new MessageRuntimeException(statusCode, message);
 	 * 框架会自动把相关信息转成json返回给客户端
 	 * 
-	 * @param yourAssert
+	 * @param asserted
 	 * @param message    
-	 * @param statusCode
 	 */
 	public void assertEmpty(String asserted, String message) {
 		AssertUtil.assertEmpty(asserted, message, Message.statusCode_MessageExecption);
@@ -213,7 +212,7 @@ public abstract class BaseProcessor implements Serializable {
 	 * 更加简洁的数据校验方法,若 asserted不为空且不为null,则会抛出 new MessageRuntimeException({@link Message#statusCode_MessageExecption}, message);
 	 * 框架会自动把相关信息转成json返回给客户端
 	 * 
-	 * @param yourAssert
+	 * @param asserted
 	 * @param message    
 	 */
 	public void assertEmpty(String asserted, String message, int statusCode) {
