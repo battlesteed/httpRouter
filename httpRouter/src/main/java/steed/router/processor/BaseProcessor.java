@@ -15,6 +15,7 @@ import steed.ext.util.logging.LoggerFactory;
 import steed.router.HttpRouter;
 import steed.router.RouterConfig;
 import steed.router.domain.Message;
+import steed.router.exception.message.MessageRuntimeException;
 import steed.util.AssertUtil;
 /**
  * 处理器,处理HttpRouter分发过来的http请求<br>
@@ -152,31 +153,113 @@ public abstract class BaseProcessor implements Serializable {
 		}
 	}
 	
-	public void assertTrue(boolean yourAssert,String message){
-		AssertUtil.assertTrue(yourAssert, message, Message.statusCode_UnknownError);
+	/**
+	 * 更加简洁的数据校验方法,若 !yourAssert ,则会抛出 new MessageRuntimeException(statusCode, message);
+	 * 框架会自动把相关信息转成json返回给客户端
+	 * 
+	 * @param yourAssert
+	 * @param message    
+	 * @param statusCode
+	 */
+	public void assertTrue(boolean yourAssert, String message, int statusCode) {
+		AssertUtil.assertTrue(yourAssert, message, statusCode);
 	}
-	public void assertNotEmpty(String asserted,String message,int statusCode){
+
+	/**
+	 * 更加简洁的数据校验方法,若 !yourAssert ,则会抛出 new MessageRuntimeException({@link Message#statusCode_MessageExecption}, message);
+	 * 框架会自动把相关信息转成json返回给客户端
+	 * 
+	 * @param yourAssert
+	 * @param message    
+	 */
+	public void assertTrue(boolean yourAssert, String message) {
+		AssertUtil.assertTrue(yourAssert, message, Message.statusCode_MessageExecption);
 	}
-	public void assertNotEmpty(String asserted,String message){
-		AssertUtil.assertTrue(!StringUtil.isStringEmpty(asserted), message);
+	/**
+	 * 更加简洁的数据校验方法,若 asserted为空或null ,则会抛出 new MessageRuntimeException(statusCode, message);
+	 * 框架会自动把相关信息转成json返回给客户端
+	 * 
+	 * @param yourAssert
+	 * @param message    
+	 * @param statusCode
+	 */
+	public void assertNotEmpty(String asserted, String message, int statusCode) {
+		AssertUtil.assertTrue(!StringUtil.isStringEmpty(asserted), message, statusCode);
 	}
-	public void assertEmpty(String asserted,String message){
-		AssertUtil.assertTrue(StringUtil.isStringEmpty(asserted), message);
+
+	/**
+	 * 更加简洁的数据校验方法,若 asserted为空或null ,则会抛出 new MessageRuntimeException({@link Message#statusCode_MessageExecption}, message);
+	 * 框架会自动把相关信息转成json返回给客户端
+	 * 
+	 * @param yourAssert
+	 * @param message    
+	 */
+	public void assertNotEmpty(String asserted, String message) {
+		AssertUtil.assertNotEmpty(asserted, message, Message.statusCode_MessageExecption);
 	}
-	public void assertEmpty(String asserted,String message,int statusCode){
-		AssertUtil.assertTrue(StringUtil.isStringEmpty(asserted), message,statusCode);
+
+	/**
+	 * 更加简洁的数据校验方法,若 asserted不为空且不为null ,则会抛出 new MessageRuntimeException(statusCode, message);
+	 * 框架会自动把相关信息转成json返回给客户端
+	 * 
+	 * @param yourAssert
+	 * @param message    
+	 * @param statusCode
+	 */
+	public void assertEmpty(String asserted, String message) {
+		AssertUtil.assertEmpty(asserted, message, Message.statusCode_MessageExecption);
 	}
-	public void assertNotNull(Object asserted,String message){
-		AssertUtil.assertNotNull(asserted, message, Message.statusCode_UnknownError);
+	/**
+	 * 更加简洁的数据校验方法,若 asserted不为空且不为null,则会抛出 new MessageRuntimeException({@link Message#statusCode_MessageExecption}, message);
+	 * 框架会自动把相关信息转成json返回给客户端
+	 * 
+	 * @param yourAssert
+	 * @param message    
+	 */
+	public void assertEmpty(String asserted, String message, int statusCode) {
+		AssertUtil.assertTrue(StringUtil.isStringEmpty(asserted), message, statusCode);
 	}
-	public static void assertNotNull(Object asserted,String message,int statusCode){
-		AssertUtil.assertTrue(asserted != null, message,statusCode);
+
+	/**
+	 * 更加简洁的数据校验方法,若 asserted为null,则会抛出 new MessageRuntimeException({@link Message#statusCode_MessageExecption}, message);
+	 * 框架会自动把相关信息转成json返回给客户端
+	 * 
+	 * @param asserted
+	 * @param message    
+	 */
+	public void assertNotNull(Object asserted, String message) {
+		AssertUtil.assertNotNull(asserted, message, Message.statusCode_MessageExecption);
 	}
-	public void assertNull(Object asserted,String message){
-		AssertUtil.assertTrue(asserted == null, message);
+	/**
+	 * 更加简洁的数据校验方法,若 asserted为null,则会抛出 new MessageRuntimeException(statusCode, message);
+	 * 框架会自动把相关信息转成json返回给客户端
+	 * 
+	 * @param asserted
+	 * @param message    
+	 */
+	public void assertNotNull(Object asserted, String message, int statusCode) {
+		AssertUtil.assertTrue(asserted != null, message, statusCode);
 	}
-	public void assertNull(Object asserted,String message,int statusCode){
-		AssertUtil.assertTrue(asserted == null, message,statusCode);
+
+	/**
+	 * 更加简洁的数据校验方法,若 asserted不为null,则会抛出 new MessageRuntimeException({@link Message#statusCode_MessageExecption}, message);
+	 * 框架会自动把相关信息转成json返回给客户端
+	 * 
+	 * @param asserted
+	 * @param message    
+	 */
+	public void assertNull(Object asserted, String message) {
+		AssertUtil.assertNull(asserted, message, Message.statusCode_MessageExecption);
+	}
+	/**
+	 * 更加简洁的数据校验方法,若 asserted不为null,则会抛出 new MessageRuntimeException(statusCode, message);
+	 * 框架会自动把相关信息转成json返回给客户端
+	 * 
+	 * @param asserted
+	 * @param message    
+	 */
+	public void assertNull(Object asserted, String message, int statusCode) {
+		AssertUtil.assertTrue(asserted == null, message, statusCode);
 	}
 	
 }

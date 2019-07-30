@@ -12,7 +12,14 @@ import steed.hibernatemaster.domain.BaseDomain;
 public class Message extends BaseDomain{
 	private static final long serialVersionUID = 7956968695852861290L;
 	public static final int statusCodeSuccess = 0;
+	/**
+	 * 通用异常状态码
+	 */
 	public static final int statusCode_UnknownError = 300;
+	/**
+	 * 消息提示状态码
+	 */
+	public static final int statusCode_MessageExecption = 301;
 	private Integer statusCode;
 	private String message;
 	private String url;

@@ -46,6 +46,7 @@ public abstract class Rap2APIConfigLoader extends SimpleAPIConfigLoader {
 				logger.warn("未找到path为"+path+"的processor!");
 			}
 		});
+		
 		return configCache;
 	}
 
