@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Serializable;
 
 import javax.servlet.ServletContext;
+import javax.servlet.ServletInputStream;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -15,8 +16,8 @@ import steed.ext.util.logging.LoggerFactory;
 import steed.router.HttpRouter;
 import steed.router.RouterConfig;
 import steed.router.domain.Message;
-import steed.router.exception.message.MessageRuntimeException;
 import steed.util.AssertUtil;
+import steed.util.ext.base.IOUtil;
 /**
  * 处理器,处理HttpRouter分发过来的http请求<br>
  * 若Processor中的方法返回String,HttpRouter会forward到String对应的jsp页面(若string以.jsp结尾)或直接把string内容返回给客户端,若返回其它类型的对象,则会将对象转成json写到response,
@@ -62,7 +63,7 @@ public abstract class BaseProcessor implements Serializable {
 	
 	/**
 	 * Processor开始处理完请求后会执行该方法
-	 * @param methodName Processor即将被http访问到的方法名
+	 * @param methodName Processor被http访问到的方法名
 	 * @param returnValue Processor方法返回值,若方法为void,则该值为null
 	 */
 	public void afterAction(String methodName,Object returnValue) {
@@ -260,5 +261,24 @@ public abstract class BaseProcessor implements Serializable {
 	public void assertNull(Object asserted, String message, int statusCode) {
 		AssertUtil.assertTrue(asserted == null, message, statusCode);
 	}
-	
+	/**
+	 * 获取http请求中的payload
+	 * @param charset 字符串编码
+	 * @return 字符串格式的payload
+	 */
+	public String getPayLoad(String charset) {
+		try {
+			return IOUtil.file2StringBuffer(getRequest().getInputStream(), charset).toString();
+		} catch (IOException e) {
+			logger.error("获取payload失败!",e);
+			return null;
+		}
+	}
+	/**
+	 * 获取http请求中的payload
+	 * @param charset 字符串编码
+	 */
+	public String getPayLoad() {
+		return getPayLoad(StringUtil.getCharacterSet());
+	}
 }
