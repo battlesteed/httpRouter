@@ -9,6 +9,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
+import steed.ext.util.base.BaseUtil;
 import steed.ext.util.logging.Logger;
 import steed.ext.util.logging.LoggerFactory;
 import steed.router.api.domain.Api;
@@ -34,7 +35,12 @@ public abstract class Rap2APIConfigLoader extends SimpleAPIConfigLoader {
 
 	@Override
 	public Map<Class<? extends BaseProcessor>, ProcessorConfig> loadProcessorsConfig(Map<String, Class<? extends BaseProcessor>> pathProcessor) {
-		loadRap2Data();
+		try {
+			loadRap2Data();
+		} catch (Exception e) {
+			logger.error("加载rap2接口文档出错!");
+			return configCache;
+		}
 		
 		apis.entrySet().forEach((temp) -> {
 			String url = temp.getKey();
@@ -102,6 +108,10 @@ public abstract class Rap2APIConfigLoader extends SimpleAPIConfigLoader {
 		for (int i = 0; i < properties.size(); i++) {
 			JsonObject param = (JsonObject) properties.get(i);
 			if (!"request".equals(param.get("scope").getAsString())) {
+				continue;
+			}
+			//TODO 加入请求头校验
+			if(param.get("pos").getAsInt() != 2) {
 				continue;
 			}
 			Parameter p = new Parameter();

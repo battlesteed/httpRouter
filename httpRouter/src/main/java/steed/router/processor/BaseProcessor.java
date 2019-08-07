@@ -251,6 +251,7 @@ public abstract class BaseProcessor implements Serializable {
 	public void assertNull(Object asserted, String message) {
 		AssertUtil.assertNull(asserted, message, Message.statusCode_MessageExecption);
 	}
+	
 	/**
 	 * 更加简洁的数据校验方法,若 asserted不为null,则会抛出 new MessageRuntimeException(statusCode, message);
 	 * 框架会自动把相关信息转成json返回给客户端
@@ -261,6 +262,7 @@ public abstract class BaseProcessor implements Serializable {
 	public void assertNull(Object asserted, String message, int statusCode) {
 		AssertUtil.assertTrue(asserted == null, message, statusCode);
 	}
+	
 	/**
 	 * 获取http请求中的payload
 	 * @param charset 字符串编码
@@ -274,9 +276,9 @@ public abstract class BaseProcessor implements Serializable {
 			return null;
 		}
 	}
+	
 	/**
 	 * 获取http请求中的payload
-	 * @param charset 字符串编码
 	 */
 	public String getPayLoad() {
 		return getPayLoad(StringUtil.getCharacterSet());

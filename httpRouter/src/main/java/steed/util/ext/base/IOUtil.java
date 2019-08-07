@@ -138,14 +138,10 @@ public class IOUtil implements Closeable{
 	
 	/**
 	 * saveString
-	 * @return
 	 */
 	public static void saveString(String path,String charsetName,String content){
 		saveString(getFileAndMakeDirs(path), charsetName, content);
 	}
-	/**
-	 * @return
-	 */
 	public static void saveString(File file,String charsetName,String content){
 		IOUtil io = new IOUtil();
 		try {
@@ -184,7 +180,7 @@ public class IOUtil implements Closeable{
 	
 	/**
 	 * 把文件中的字符读到string中
-	 * @param path 文本路径
+	 * @param file 文本文件
 	 * @return
 	 */
 	public static StringBuffer file2StringBuffer(File file,String charsetName){
