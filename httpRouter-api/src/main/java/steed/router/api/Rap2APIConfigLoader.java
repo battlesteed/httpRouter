@@ -1,9 +1,12 @@
 package steed.router.api;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -15,6 +18,7 @@ import steed.ext.util.logging.LoggerFactory;
 import steed.router.api.domain.Api;
 import steed.router.api.domain.Parameter;
 import steed.router.api.domain.ProcessorConfig;
+import steed.router.api.domain.ReturnVal;
 import steed.router.processor.BaseProcessor;
 
 /**
@@ -92,9 +96,14 @@ public abstract class Rap2APIConfigLoader extends SimpleAPIConfigLoader {
 			a.setDesc(api.get("description").getAsString());
 			a.setName(api.get("name").getAsString());
 			a.setPath(api.get("url").getAsString());
+			if (api.has("returnSample")) {
+				JsonElement jsonElement = api.get("returnSample");
+				a.setReturnSample(jsonElement.getAsString());
+			}
 			apis2.put(api.get("url").getAsString().replace(path, ""), a);
 			
 			addParameters(api, a.getParameters());
+			addReturnval(api, a.getReturns());
 			
 			configCache.put(processor, fromJson);
 			
@@ -103,6 +112,37 @@ public abstract class Rap2APIConfigLoader extends SimpleAPIConfigLoader {
 		}
 	}
 
+	private void addReturnval(JsonObject api, List<ReturnVal> returns) {
+		JsonArray properties = api.getAsJsonArray("properties");
+		Map<Long, ReturnVal> map = new LinkedHashMap<Long, ReturnVal>();
+		Map<Long, ReturnVal> index = new HashMap<Long, ReturnVal>();
+		for (int i = 0; i < properties.size(); i++) {
+			JsonObject param = (JsonObject) properties.get(i);
+			if (!"response".equals(param.get("scope").getAsString())) {
+				continue;
+			}
+			
+			ReturnVal r = new ReturnVal();
+			JsonElement description = param.get("description");
+			if (!description.isJsonNull()) {
+				r.setDesc(description.getAsString());
+			}
+			r.setName(param.get("name").getAsString());
+			r.setRequire(param.get("required").getAsBoolean());
+			r.setType(param.get("type").getAsString());
+			long id = param.get("id").getAsLong();
+			index.put(id, r);
+			
+			long parentId = param.get("parentId").getAsLong();
+			if (parentId == -1) {
+				map.put(id, r);
+			}else {
+				index.get(parentId).addSonReturn(r);
+			}
+		}
+		
+		returns.addAll(map.values());
+	}
 	private void addParameters(JsonObject api, Map<String, Parameter> parameters) {
 		JsonArray properties = api.getAsJsonArray("properties");
 		for (int i = 0; i < properties.size(); i++) {
@@ -115,7 +155,10 @@ public abstract class Rap2APIConfigLoader extends SimpleAPIConfigLoader {
 				continue;
 			}
 			Parameter p = new Parameter();
-			p.setDesc(param.get("description").getAsString());
+			JsonElement description = param.get("description");
+			if (!description.isJsonNull()) {
+				p.setDesc(description.getAsString());
+			}
 			p.setName(param.get("name").getAsString());
 			p.setRequire(param.get("required").getAsBoolean());
 			p.setType(param.get("type").getAsString());

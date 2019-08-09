@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,6 +23,7 @@ import steed.router.api.SimpleAPIConfigLoader;
 import steed.router.api.domain.Api;
 import steed.router.api.domain.Parameter;
 import steed.router.api.domain.ProcessorConfig;
+import steed.router.api.domain.ReturnVal;
 import steed.router.api.domain.Summary;
 import steed.router.processor.BaseProcessor;
 
@@ -102,6 +104,17 @@ public class SimpleDocumentGenerator implements DocumentGenerator{
 				StringBuffer parameterDoc = new StringBuffer();
 				parameters.forEach((key,value)->{
 					parameterDoc.append(readTemplateFile(processorConfig, value, "parameter.md"));
+				});
+				return parameterDoc.toString();
+			}else if ("returns".equals(group)) {
+				List<ReturnVal> returns = (List<ReturnVal>) fieldValueByGetter;
+				if (returns.isEmpty()) {
+					return "";
+				}
+				StringBuffer parameterDoc = new StringBuffer();
+				returns.forEach((temp)->{
+					StringBuffer readTemplateFile = readTemplateFile(processorConfig, temp, "returnVal.md");
+					parameterDoc.append(readTemplateFile.toString().trim()+"\n");
 				});
 				return parameterDoc.toString();
 			}else if(fieldValueByGetter instanceof Boolean) {

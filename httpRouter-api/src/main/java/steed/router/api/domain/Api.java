@@ -1,6 +1,8 @@
 package steed.router.api.domain;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Api {
@@ -13,9 +15,14 @@ public class Api {
 	private Map<String, Parameter> parameters;
 	private String[] removeParameters;
 	
+	private List<ReturnVal> returns = new ArrayList<ReturnVal>();
+	
+	private String returnSample;
+	
 	public String getName() {
 		return name;
 	}
+	
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -45,6 +52,22 @@ public class Api {
 	}
 	public void setRemoveParameters(String[] removeParameters) {
 		this.removeParameters = removeParameters;
+	}
+	
+	public List<ReturnVal> getReturns() {
+		return returns;
+	}
+	
+	public void setReturns(List<ReturnVal> returns) {
+		this.returns = returns;
+	}
+	
+	public String getReturnSample() {
+		return returnSample;
+	}
+	
+	public void setReturnSample(String returnSample) {
+		this.returnSample = returnSample;
 	}
 	
 }
