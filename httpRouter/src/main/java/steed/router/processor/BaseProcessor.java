@@ -278,6 +278,22 @@ public abstract class BaseProcessor implements Serializable {
 	}
 	
 	/**
+	 * 允许跨域
+	 */
+	protected void accessControlAllow() {
+		HttpServletResponse resp = getResponse();
+		HttpServletRequest req = getRequest();
+		resp.setHeader("Access-Control-Allow-Origin", req.getHeader("Origin"));
+		resp.setHeader("Access-Control-Allow-Credentials", "true");
+		resp.setHeader("P3P", "CP=CAO PSA OUR");
+		if (req.getHeader("Access-Control-Request-Method") != null && "OPTIONS".equals(req.getMethod())) {
+			resp.addHeader("Access-Control-Allow-Methods", "POST,GET,TRACE,OPTIONS");
+			resp.addHeader("Access-Control-Allow-Headers", "Content-Type,Origin,Accept");
+			resp.addHeader("Access-Control-Max-Age", "120");
+		}
+	}
+	
+	/**
 	 * 获取http请求中的payload
 	 */
 	public String getPayLoad() {

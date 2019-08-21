@@ -30,8 +30,6 @@ public class IOUtil implements Closeable{
 	
 	private List<Closeable> waitToClose = new ArrayList<>();
 	
-	
-	
 	public BufferedReader getBufferedReader(InputStream in,String charsetName) throws FileNotFoundException{
 		try {
 			InputStreamReader inputStreamReader = new InputStreamReader(in,charsetName);
