@@ -287,8 +287,8 @@ public abstract class BaseProcessor implements Serializable {
 		resp.setHeader("Access-Control-Allow-Credentials", "true");
 		resp.setHeader("P3P", "CP=CAO PSA OUR");
 		if (req.getHeader("Access-Control-Request-Method") != null && "OPTIONS".equals(req.getMethod())) {
-			resp.addHeader("Access-Control-Allow-Methods", "POST,GET,TRACE,OPTIONS");
-			resp.addHeader("Access-Control-Allow-Headers", "Content-Type,Origin,Accept");
+			resp.addHeader("Access-Control-Allow-Methods", "GET,HEAD,PUT,POST,DELETE,PATCH");
+			resp.addHeader("Access-Control-Allow-Headers", "Content-Type,Origin,Accept,x-request-with");
 			resp.addHeader("Access-Control-Max-Age", "120");
 		}
 	}

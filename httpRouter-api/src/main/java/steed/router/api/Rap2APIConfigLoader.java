@@ -137,7 +137,10 @@ public abstract class Rap2APIConfigLoader extends SimpleAPIConfigLoader {
 			if (parentId == -1) {
 				map.put(id, r);
 			}else {
-				index.get(parentId).addSonReturn(r);
+				//rap2bug 极少字段找不到父节点
+				if (index.get(parentId) != null) {
+					index.get(parentId).addSonReturn(r);
+				}
 			}
 		}
 		
