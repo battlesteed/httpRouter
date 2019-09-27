@@ -26,6 +26,7 @@ import steed.router.annotation.DontAccess;
 import steed.router.annotation.Power;
 import steed.router.domain.Message;
 import steed.router.exception.message.MessageExceptionInterface;
+import steed.router.exception.message.MessageRuntimeException;
 import steed.router.processor.BaseProcessor;
 
 
@@ -120,7 +121,8 @@ public abstract class HttpRouter{
     
     protected void onException(Exception e,HttpServletRequest request, HttpServletResponse response) {
     	Message message;
-    	if (e instanceof MessageExceptionInterface) {
+    	if (e instanceof MessageExceptionInterface || 
+    			MessageRuntimeException.class.getSimpleName().equals(e.getClass().getSimpleName())) {//兼容旧版messageRuntime
 			message = ((MessageExceptionInterface)e).getMsg();
 			if (RouterConfig.devMode) {
 				logger.debug("抛出异常提示:",e);
