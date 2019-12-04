@@ -38,6 +38,8 @@ public class BaseCRUDProcessor<SteedDomain extends BaseDatabaseDomain> extends M
 	 * 操作名称,"修改","删除","添加"等,若事务提交成功,则会自动返回 operationName + "成功!"给客户端,否则返回 operationName + "失败!"
 	 */
 	protected String operationName;
+	protected String successMessage;
+	protected String failMessage;
 	
 	public void setCurrentPage(int currentPage) {
 		this.currentPage = currentPage;
@@ -135,7 +137,7 @@ public class BaseCRUDProcessor<SteedDomain extends BaseDatabaseDomain> extends M
 	}
 	
  
-	protected String add(){
+	public String add(){
 		return steed_forward;
 	}
 	protected String lookOver(){
@@ -206,32 +208,12 @@ public class BaseCRUDProcessor<SteedDomain extends BaseDatabaseDomain> extends M
 		return steed_forward;
 	}
 	/**
-	 * 将model更新到数据库，并以json格式返回更新状态（成功与否）到前端
+	 * 将model不为空的字段更新到数据库，并以json格式返回更新状态（成功与否）到前端
 	 * 你可能需要steed.action.BaseAction.updateNotNullField()
 	 * 
-	 * @see #updateNotNullField
 	 */
 	public String update(){
-		((BaseDatabaseDomain)getModel()).update();
-		return null;
-	}
-	/**
-	 * 将model不为空的字段更新到数据库，并以json格式返回更新状态（成功与否）到前端
-	 * 你可能需要steed.action.BaseAction.update()
-	 * @return null
-	 */
-	public String updateNotNullField(){
-		return updateNotNullField(null);
-	}
-	
-	public String updateNotNullField(List<String> updateEvenNull){
-		updateNotNullField(updateEvenNull, true);
-		return null;
-	}
-	
-	public String updateNotNullField(List<String> updateEvenNull,boolean strictlyMode){
-		BaseRelationalDatabaseDomain model = (BaseRelationalDatabaseDomain) getModel();
-		model.updateNotNullFieldByHql(updateEvenNull, strictlyMode);
+		((BaseRelationalDatabaseDomain) getModel()).updateNotNullFieldByHql();
 		return null;
 	}
 	
@@ -242,14 +224,30 @@ public class BaseCRUDProcessor<SteedDomain extends BaseDatabaseDomain> extends M
 			return;
 		}
 		String operation = getOperationName(methodName);
-		if (operation != null) {
+		if (operation != null || successMessage != null || failMessage != null) {
 			if (isTransactionSuccessful()) {
-				writeJson(new Message(operation+"成功!"));
+				writeJson(new Message(getSuccessMessage(methodName)));
 			}else {
-				writeJson(new Message(Message.statusCode_UnknownError,operation+"失败"));
+				writeJson(new Message(Message.statusCode_UnknownError,getFailMessage(methodName)));
 			}
 		}
 		
+	}
+
+	public String getSuccessMessage(String methodName) {
+		if (successMessage == null) {
+			String operation = getOperationName(methodName);
+			return operation + "成功!";
+		}
+		return successMessage;
+	}
+
+	public String getFailMessage(String methodName) {
+		if (failMessage == null) {
+			String operation = getOperationName(methodName);
+			return operation + "失败!";
+		}
+		return failMessage;
 	}
 
 	protected boolean isTransactionSuccessful() {

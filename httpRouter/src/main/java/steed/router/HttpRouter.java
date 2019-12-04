@@ -47,6 +47,7 @@ public abstract class HttpRouter{
 	public static HttpServletRequest getRequest(){
 		return requestThreadLocal.get();
 	}
+	
 	public static HttpServletResponse getResponse(){
 		return responseThreadLocal.get();
 	}
@@ -54,9 +55,11 @@ public abstract class HttpRouter{
     public ParameterFiller getParamterFiller() {
 		return paramterFiller;
 	}
+    
 	public void setParamterFiller(ParameterFiller paramterFiller) {
 		this.paramterFiller = paramterFiller;
 	}
+	
 	public Map<String, Class<? extends BaseProcessor>> getPathProcessor() {
 		return pathProcessor;
 	}
@@ -121,15 +124,18 @@ public abstract class HttpRouter{
     
     protected void onException(Exception e,HttpServletRequest request, HttpServletResponse response) {
     	Message message;
-    	if (e instanceof MessageExceptionInterface || 
-    			MessageRuntimeException.class.getSimpleName().equals(e.getClass().getSimpleName())) {//兼容旧版messageRuntime
+    	if (e instanceof MessageExceptionInterface) {//兼容旧版messageRuntime
 			message = ((MessageExceptionInterface)e).getMsg();
 			if (RouterConfig.devMode) {
 				logger.debug("抛出异常提示:",e);
+			}else {
+				logger.debug("抛出异常提示:",e.getMessage());
 			}
 		}else {
 			message = new Message(Message.statusCode_UnknownError, RouterConfig.defaultErrorMessage);
-			if (RouterConfig.devMode && !StringUtil.isStringEmpty(e.getMessage())) {
+			if ((RouterConfig.devMode  || 
+	    			MessageRuntimeException.class.getSimpleName().equals(e.getClass().getSimpleName()) )
+					&& !StringUtil.isStringEmpty(e.getMessage())) {
 				//开发模式直接提示异常信息
 				message.setMessage(e.getMessage());
 			}
@@ -211,7 +217,7 @@ public abstract class HttpRouter{
 		try {
 			Method method = processor.getMethod(methodName);
 			if (method.getDeclaringClass() != processor) {
-				logger.error("方法%s为父类方法,不允许通过http调用,若要重写,请在子类重写该方法!",method.toString());
+				logger.error("方法%s为父类方法,不允许通过http调用,若要调用,请在子类重写该方法!",method.toString());
 				response.sendError(RouterConfig.FORBIDDEN_STATUS_CODE);
 				return;
 			}
@@ -250,10 +256,10 @@ public abstract class HttpRouter{
 							jsp = mergePath(RouterConfig.baseJspPath, parentPath+methodName+".jsp");
 						}
 						if (jsp.endsWith(".jsp")) {
-							logger.debug("forward到%s",jsp);
 							if (!jsp.startsWith("/")) {
 								jsp = mergePath(RouterConfig.baseJspPath, parentPath + jsp);
 							}
+							logger.debug("forward到%s",jsp);
 							request.getRequestDispatcher(jsp).forward(request, response);;
 						}else {
 							writeString(jsp, request, response);
