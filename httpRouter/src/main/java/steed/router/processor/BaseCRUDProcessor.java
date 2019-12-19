@@ -251,7 +251,7 @@ public class BaseCRUDProcessor<SteedDomain extends BaseDatabaseDomain> extends M
 	}
 
 	protected boolean isTransactionSuccessful() {
-		return DaoUtil.managTransaction();
+		return DaoUtil.getTransactionType() == null || DaoUtil.managTransaction();
 	}
 	
 	/**

@@ -3,18 +3,21 @@ package steed.router.processor;
 import java.io.IOException;
 import java.io.Serializable;
 
+import javax.management.RuntimeErrorException;
 import javax.servlet.ServletContext;
-import javax.servlet.ServletInputStream;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import steed.ext.util.base.BaseUtil;
+import steed.ext.util.base.PathUtil;
 import steed.ext.util.base.StringUtil;
 import steed.ext.util.logging.Logger;
 import steed.ext.util.logging.LoggerFactory;
 import steed.router.HttpRouter;
 import steed.router.RouterConfig;
+import steed.router.annotation.Path;
 import steed.router.domain.Message;
 import steed.util.AssertUtil;
 import steed.util.ext.base.IOUtil;
@@ -75,9 +78,7 @@ public abstract class BaseProcessor implements Serializable {
 	}
 	protected HttpServletRequest getRequest() {
 		return HttpRouter.getRequest();
-//		return ContextUtil.getRequest();
 	}
-	
 	protected HttpSession getSession() {
 		return getRequest().getSession();
 	}
@@ -134,8 +135,7 @@ public abstract class BaseProcessor implements Serializable {
 	}
 	
 	protected ServletContext getServletContext() {
-		//艹，兼容Servlet2.5只能这样写
-		return getRequest().getSession().getServletContext();
+		return getRequest().getServletContext();
 	}
 	
 	/**
@@ -299,4 +299,17 @@ public abstract class BaseProcessor implements Serializable {
 	public String getPayLoad() {
 		return getPayLoad(StringUtil.getCharacterSet());
 	}
+	
+	/**
+	 * 获取Processor对应的jsp目录
+	 * @return Processor对应的jsp目录(相对于tomcat目录的路径,非绝对路径)
+	 */
+	public String getJspFolder() {
+		Path annotation = getClass().getAnnotation(Path.class);
+		if (annotation == null) {
+			throw new RuntimeException("path注解为null,无法获取Processor对应的jsp目录");
+		}
+		return PathUtil.mergePath(RouterConfig.baseJspPath, annotation.value());
+	}
+	
 }

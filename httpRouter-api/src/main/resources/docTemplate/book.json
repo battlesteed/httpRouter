@@ -1,0 +1,23 @@
+{
+	"title":"",
+	"author":"战马",
+	"language" : "en",
+	"plugins": [
+	"back-to-top-button","code","splitter",
+	"-sharing-plus",
+	"tbfed-pagefooter",
+	"auto-scroll-table",
+	"popup",
+	"-sitemap",
+	"mermaid",
+	"-baidu",
+	"duoshuo"
+	],
+	"pluginsConfig": {
+        "tbfed-pagefooter": {
+            "copyright":"战马",
+            "modify_label": "该文件修订时间：",
+            "modify_format": "YYYY-MM-DD HH:mm:ss"
+        }
+    }
+}

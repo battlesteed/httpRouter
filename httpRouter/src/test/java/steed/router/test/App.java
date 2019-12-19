@@ -40,7 +40,6 @@ public class App{
 				@Override
 				protected boolean checkPower(HttpServletRequest request, HttpServletResponse response, String uri,
 						String power) {
-					LoggerFactory.getLogger().debug("检测权限%s,uri:%s",power,uri);
 					return super.checkPower(request, response, uri, power);
 				}
 			};

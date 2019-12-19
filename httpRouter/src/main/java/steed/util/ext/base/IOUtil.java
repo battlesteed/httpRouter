@@ -177,6 +177,29 @@ public class IOUtil implements Closeable{
 	}
 	
 	/**
+	 * 输入流字符读到string中
+	 * @param in 输入流
+	 * @return
+	 */
+	public static StringBuffer stream2StringBuffer(InputStream in,String charsetName){
+		StringBuffer sb = new StringBuffer();
+		IOUtil io = new IOUtil();
+		try {
+			BufferedReader bufferedReader = io.getBufferedReader(in,charsetName);
+			String temp;
+			while ((temp = bufferedReader.readLine()) != null) {
+				sb.append(temp);
+				sb.append("\n");
+			}
+			return sb;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}finally{
+			io.close();
+		}
+	}
+	/**
 	 * 把文件中的字符读到string中
 	 * @param file 文本文件
 	 * @return

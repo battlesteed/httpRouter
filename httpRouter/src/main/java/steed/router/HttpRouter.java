@@ -15,13 +15,13 @@ import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import steed.ext.util.base.PathUtil;
 import steed.ext.util.base.StringUtil;
 import steed.ext.util.logging.Logger;
 import steed.ext.util.logging.LoggerFactory;
 import steed.ext.util.reflect.ReflectUtil;
 import steed.hibernatemaster.Config;
 import steed.hibernatemaster.util.DaoUtil;
-import steed.hibernatemaster.util.HibernateUtil;
 import steed.router.annotation.DontAccess;
 import steed.router.annotation.Power;
 import steed.router.domain.Message;
@@ -150,7 +150,7 @@ public abstract class HttpRouter{
 			try {
 				request.setAttribute(RouterConfig.exceptionAttributeKey, e);
 				request.setAttribute(RouterConfig.messageAttributeKey, RouterConfig.messageAttributeKey);
-				request.getRequestDispatcher(mergePath(RouterConfig.baseJspPath, RouterConfig.message_page)).forward(request, response);
+				request.getRequestDispatcher(PathUtil.mergePath(RouterConfig.baseJspPath, RouterConfig.message_page)).forward(request, response);
 			} catch (ServletException | IOException e1) {
 				logger.error("跳转消息提示页出错!",e);
 			}
@@ -198,8 +198,6 @@ public abstract class HttpRouter{
 		}finally {
 			requestThreadLocal.remove();
 			responseThreadLocal.remove();
-			HibernateUtil.release();
-			DaoUtil.relese();
 		}
     }
     
@@ -253,11 +251,11 @@ public abstract class HttpRouter{
 					if (invoke instanceof String) {
 						String jsp = (String) invoke;
 						if (RouterConfig.steed_forward.equals(invoke)) {
-							jsp = mergePath(RouterConfig.baseJspPath, parentPath+methodName+".jsp");
+							jsp = PathUtil.mergePath(RouterConfig.baseJspPath, parentPath+methodName+".jsp");
 						}
 						if (jsp.endsWith(".jsp")) {
 							if (!jsp.startsWith("/")) {
-								jsp = mergePath(RouterConfig.baseJspPath, parentPath + jsp);
+								jsp = PathUtil.mergePath(RouterConfig.baseJspPath, parentPath + jsp);
 							}
 							logger.debug("forward到%s",jsp);
 							request.getRequestDispatcher(jsp).forward(request, response);;
@@ -325,26 +323,6 @@ public abstract class HttpRouter{
 		return requestURI.substring(0,requestURI.lastIndexOf("/")+1);
 	}
     
-    /**
-	 * 合并路径,防止出现双斜杠或者没有斜杠
-	 * @return
-	 */
-	private static String mergePath(String path1,String path2){
-		return mergePath(path1, path2, "/");
-	}
-	
-	private static String mergePath(String path1,String path2,String separator){
-		if (path2.startsWith(separator)&&path1.endsWith(separator)) {
-			return path1 + path2.substring(1);
-		}else if(!path2.startsWith(separator)&&!path1.endsWith(separator)){
-			return path1 + separator + path2;
-		}else if(path2.startsWith(separator)&&path1.endsWith(separator)){
-			return path1.substring(0, path1.length()-1) + path2;
-		}else {
-			return path1 + path2;
-		}
-	}
-
 	private String getPower(Power annotation) {
 		if (annotation != null) {
 			return annotation.value();
