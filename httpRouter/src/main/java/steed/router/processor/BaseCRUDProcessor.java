@@ -36,9 +36,16 @@ public class BaseCRUDProcessor<SteedDomain extends BaseDatabaseDomain> extends M
 	
 	/**
 	 * 操作名称,"修改","删除","添加"等,若事务提交成功,则会自动返回 operationName + "成功!"给客户端,否则返回 operationName + "失败!"
+	 * 优先级小于 {@link #successMessage}, {@link #failMessage}
 	 */
 	protected String operationName;
+	/**
+	 * 事务成功提交后返回给客户端的消息,优先级高于{@link #operationName}
+	 */
 	protected String successMessage;
+	/**
+	 * 事务提交失败后返回给客户端的消息,优先级高于{@link #operationName}
+	 */
 	protected String failMessage;
 	
 	public void setCurrentPage(int currentPage) {

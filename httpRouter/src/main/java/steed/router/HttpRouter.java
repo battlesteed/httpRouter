@@ -230,7 +230,7 @@ public abstract class HttpRouter{
 			Power annotation = method.getAnnotation(Power.class);
 			//只进行一次权限判断,方法有power则只判断方法的权限,类权限不判断
 			if (annotation != null) {
-				if (checkPower(request, response, requestURI,annotation.value())) {
+				if (!checkPower(request, response, requestURI,annotation.value())) {
 					return;
 				}
 			}else if (!checkPower(request, response, requestURI, getPower(processor.getAnnotation(Power.class)))) {
