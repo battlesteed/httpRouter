@@ -113,6 +113,9 @@ public abstract class HttpRouter{
 	 */
 	protected void writeString(String string, HttpServletRequest request, HttpServletResponse response) throws IOException{
 		ServletOutputStream out = response.getOutputStream();
+		if (RouterConfig.requestCryptor != null) {
+			
+		}
 		out.write(string.getBytes(RouterConfig.charset));
 		out.flush();
 		logger.debug("返回给客户端内容----->"+string);
@@ -203,6 +206,10 @@ public abstract class HttpRouter{
     
     private void forwardNow(HttpServletRequest request, HttpServletResponse response) throws Exception{  
 		String requestURI = request.getRequestURI();
+		if (RouterConfig.requestCryptor != null) {
+			requestURI = RouterConfig.requestCryptor.decryptUrl(requestURI, request);
+		}
+		
 		String parentPath = getParentPath(requestURI);
 		Class<? extends BaseProcessor> processor = getProcessor(response, parentPath);
 		

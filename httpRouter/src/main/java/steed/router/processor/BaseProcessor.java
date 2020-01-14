@@ -93,7 +93,7 @@ public abstract class BaseProcessor implements Serializable {
 	}
 	
 	/**
-	 * 往request中放东西
+	 * 往request域中放东西
 	 * @param key 键
 	 * @param obj 值
 	 */
@@ -101,7 +101,7 @@ public abstract class BaseProcessor implements Serializable {
 		getRequest().setAttribute(key, obj);
 	}
 	/**
-	 * 从request中取东西
+	 * 从request域中取东西
 	 * @param key 键
 	 */
 	protected Object getRequestAttribute(String key){
@@ -109,24 +109,17 @@ public abstract class BaseProcessor implements Serializable {
 	}
 	/**
 	 * 获取request中的参数
-	 * @param key 键
+	 * @param key 参数名
 	 */
 	protected String getRequestParameter(String key){
 		return getRequest().getParameter(key);
-	}
-	/**
-	 * 获取request中的参数
-	 * @param key 键
-	 */
-	protected boolean isRequestParameterEmpty(String key){
-		return StringUtil.isStringEmpty(getRequest().getParameter(key));
 	}
 	
 	protected String[] getRequestParameters(String key){
 		return getRequest().getParameterValues(key);
 	}
 	/**
-	 * 往session中放东西
+	 * 往session域中放东西
 	 * @param key 键
 	 * @param obj 值
 	 */
@@ -270,7 +263,9 @@ public abstract class BaseProcessor implements Serializable {
 	 */
 	public String getPayLoad(String charset) {
 		try {
-			return IOUtil.file2StringBuffer(getRequest().getInputStream(), charset).toString();
+			String string = IOUtil.file2StringBuffer(getRequest().getInputStream(), charset).toString();
+			RouterConfig.defaultXSSCleaner.cleanXss(string);
+			return string;
 		} catch (IOException e) {
 			logger.error("获取payload失败!",e);
 			return null;
@@ -278,7 +273,8 @@ public abstract class BaseProcessor implements Serializable {
 	}
 	
 	/**
-	 * 允许跨域
+	 * 
+	 * 允许所有网站跨域.可以在{@link #beforeAction(String)}调用本方法,方便前后端联调(建议在调试模式开启,正式环境关闭)
 	 */
 	protected void accessControlAllow() {
 		HttpServletResponse resp = getResponse();

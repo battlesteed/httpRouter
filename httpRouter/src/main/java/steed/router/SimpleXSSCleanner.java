@@ -1,7 +1,5 @@
 package steed.router;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Attribute;
 import org.jsoup.nodes.Document;
@@ -34,6 +32,10 @@ public class SimpleXSSCleanner implements XSSCleaner{
 		return allowedSpecialCharParams;
 	}
 
+	/**
+	 * 设置允许存在&lt;,/,&gt;等特殊符号的参数
+	 * @param allowedSpecialCharParams 参数名
+	 */
 	public void setAllowedSpecialCharParams(String[] allowedSpecialCharParams) {
 		this.allowedSpecialCharParams = allowedSpecialCharParams;
 	}
@@ -83,6 +85,7 @@ public class SimpleXSSCleanner implements XSSCleaner{
 	 * @param str
 	 * @return
 	 */
+	@Override
 	public String cleanXss(String str) {
 		Whitelist relaxed = Whitelist.relaxed();
 		addWhitelist(relaxed);

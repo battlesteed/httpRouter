@@ -34,4 +34,6 @@ public class RouterConfig {
 	public static JsonSerializer defaultJsonSerializer = (obj)->{ return new Gson().toJson(obj);};
 	
 	public static XSSCleaner defaultXSSCleaner = new SimpleXSSCleanner();
+	
+	public static RequestCryptor requestCryptor = null;
 }

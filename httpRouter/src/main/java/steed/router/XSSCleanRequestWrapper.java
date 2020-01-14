@@ -1,5 +1,7 @@
 package steed.router;
 
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,6 +19,12 @@ public class XSSCleanRequestWrapper extends HttpServletRequestWrapper{
 	}
 
 	@Override
+	public Enumeration<String> getParameterNames() {
+		Map<String, String[]> parameterMap = getParameterMap();
+		return Collections.enumeration(parameterMap.keySet());
+	}
+
+	@Override
 	public Map<String, String[]> getParameterMap() {
 		if (initedMap) {
 			return map;
@@ -26,7 +34,16 @@ public class XSSCleanRequestWrapper extends HttpServletRequestWrapper{
 			if (map.containsKey(key)) {
 				continue;
 			}
-			map.put(key, xssCleaner.clean(tempMap.get(key), key));
+			String[] value = tempMap.get(key);
+			if (RouterConfig.requestCryptor != null) {
+				RequestParamter decrypt = RouterConfig.requestCryptor.decryptParamter(key, value, this);
+				value = decrypt.getValue();
+				key = decrypt.getKey();
+			}
+			if (key != null && value != null) {
+				value = xssCleaner.clean(value, key);
+			}
+			map.put(key, value);
 		}
 		initedMap = true;
 		return map;
