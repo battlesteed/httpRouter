@@ -114,7 +114,7 @@ public abstract class HttpRouter{
 	protected void writeString(String string, HttpServletRequest request, HttpServletResponse response) throws IOException{
 		ServletOutputStream out = response.getOutputStream();
 		if (RouterConfig.requestCryptor != null) {
-			
+			string = RouterConfig.requestCryptor.encryptPayload(string, request, response);
 		}
 		out.write(string.getBytes(RouterConfig.charset));
 		out.flush();
