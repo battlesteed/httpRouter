@@ -199,6 +199,7 @@ public abstract class HttpRouter{
 			onException(e, request, response);
 			DaoUtil.rollbackTransaction();
 		}finally {
+			DaoUtil.relese();
 			requestThreadLocal.remove();
 			responseThreadLocal.remove();
 		}
@@ -208,6 +209,7 @@ public abstract class HttpRouter{
 		String requestURI = request.getRequestURI();
 		if (RouterConfig.requestCryptor != null) {
 			requestURI = RouterConfig.requestCryptor.decryptUrl(requestURI, request);
+			logger.debug("解密后真正请求的URI:" + requestURI);
 		}
 		
 		String parentPath = getParentPath(requestURI);
