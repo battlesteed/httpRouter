@@ -97,13 +97,17 @@ public abstract class HttpRouter{
 		if (obj == null) {
 			return;
 		}
-		response.setHeader("Content-Type", "application/json");
+		setJsonMimeContentType(response);
 		String json = object2Json(obj);
 		try {
 			writeString(json, request, response);
 		} catch (IOException e) {
 			logger.error("返回json给客户端出错!",e);
 		}
+	}
+
+	private void setJsonMimeContentType(HttpServletResponse response) {
+		response.setHeader("Content-Type", "application/json");
 	}
 	
 	/**
@@ -269,6 +273,10 @@ public abstract class HttpRouter{
 							logger.debug("forward到%s",jsp);
 							request.getRequestDispatcher(jsp).forward(request, response);;
 						}else {
+							//json类型的字符串设置content-type = application/json,效率原因,不解析json,通过前后括号判断
+							if (jsp.startsWith("{") && jsp.endsWith("}")) {
+								setJsonMimeContentType(response);
+							}
 							writeString(jsp, request, response);
 						}
 					}else {
