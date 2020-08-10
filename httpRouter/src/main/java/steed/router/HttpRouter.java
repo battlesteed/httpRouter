@@ -107,7 +107,7 @@ public abstract class HttpRouter{
 	}
 
 	private void setJsonMimeContentType(HttpServletResponse response) {
-		response.setHeader("Content-Type", "application/json");
+		response.setHeader("Content-Type", "application/json;charset=" + RouterConfig.charset);
 	}
 	
 	/**
