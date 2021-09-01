@@ -1,5 +1,6 @@
 package steed.router;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -28,6 +29,7 @@ import steed.router.domain.Message;
 import steed.router.exception.message.MessageExceptionInterface;
 import steed.router.exception.message.MessageRuntimeException;
 import steed.router.processor.BaseProcessor;
+import steed.util.ext.base.IOUtil;
 
 
 /** 
@@ -258,7 +260,7 @@ public abstract class HttpRouter{
 				
 				newInstance.beforeAction(methodName);
 				Object invoke = method.invoke(newInstance);
-				newInstance.afterAction(methodName, invoke);
+				newInstance.afterAction(methodName, invoke, method.getReturnType());
 				
 				if (invoke != null) {
 					if (invoke instanceof String) {
@@ -274,11 +276,14 @@ public abstract class HttpRouter{
 							request.getRequestDispatcher(jsp).forward(request, response);;
 						}else {
 							//json类型的字符串设置content-type = application/json,效率原因,不解析json,通过前后括号判断
-							if (jsp.startsWith("{") && jsp.endsWith("}")) {
+							if ((jsp.startsWith("{") && jsp.endsWith("}")) || (jsp.startsWith("[") && jsp.endsWith("]"))) {
 								setJsonMimeContentType(response);
 							}
 							writeString(jsp, request, response);
 						}
+					}else if(invoke instanceof File) {
+						ServletOutputStream outputStream = response.getOutputStream();
+						IOUtil.file2OutpuStream((File)invoke, outputStream);
 					}else {
 						writeJsonMessage(invoke, request, response);
 					}

@@ -14,11 +14,14 @@ import java.io.Flushable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import javax.servlet.ServletOutputStream;
 
 import steed.ext.util.base.BaseUtil;
 /**
@@ -287,4 +290,20 @@ public class IOUtil implements Closeable{
 			iterator.remove();
 		}
 	}
+
+	public static void file2OutpuStream(File file,OutputStream outputStream){  
+    	try {  
+    		InputStream fis = new BufferedInputStream(new FileInputStream(file));  
+    		
+    		byte[] b = new byte[1024*1024*8];  
+    		int n;  
+    		while ((n = fis.read(b)) != -1) {  
+    			outputStream.write(b, 0, n);  
+    		}  
+    		outputStream.flush();
+    		fis.close();  
+    	} catch (IOException e) {  
+    		e.printStackTrace();  
+    	}  
+    }
 }
