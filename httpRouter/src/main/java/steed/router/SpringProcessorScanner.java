@@ -53,7 +53,14 @@ public class SpringProcessorScanner implements ProcessorScanner{
 					logger.warn("%s和%s的path均为%s,%s将被忽略!",pathProcessor.get(path).getName(),temp.getBeanClassName(),path,temp.getBeanClassName());
 					continue;
 				}
-				pathProcessor.put(addSprit(path), forName);
+				String addSprit = addSprit(path);
+				if (pathProcessor.containsKey(addSprit)) {//多个相同path的类,取继承的类
+					Class<? extends BaseProcessor> class1 = pathProcessor.get(addSprit);
+					if (!class1.isAssignableFrom(forName)) {
+						continue;
+					}
+				}
+				pathProcessor.put(addSprit, forName);
 			} catch (ClassNotFoundException | ClassCastException e) {
 				logger.error("扫描Processor出错!",e);
 			}

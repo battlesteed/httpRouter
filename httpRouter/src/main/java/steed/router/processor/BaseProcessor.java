@@ -3,14 +3,12 @@ package steed.router.processor;
 import java.io.IOException;
 import java.io.Serializable;
 
-import javax.management.RuntimeErrorException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import steed.ext.util.base.BaseUtil;
 import steed.ext.util.base.PathUtil;
 import steed.ext.util.base.StringUtil;
 import steed.ext.util.logging.Logger;
@@ -167,6 +165,10 @@ public abstract class BaseProcessor implements Serializable {
 		AssertUtil.assertTrue(yourAssert, message, statusCode);
 	}
 
+	public static void assertTrue(boolean yourAssert, String message, int statusCode,Object content) {
+		AssertUtil.assertTrue(yourAssert, message, statusCode, content);
+	}
+	
 	/**
 	 * 更加简洁的数据校验方法,若 !yourAssert ,则会抛出 new MessageRuntimeException({@link Message#statusCode_MessageExecption}, message);
 	 * 框架会自动把相关信息转成json返回给客户端

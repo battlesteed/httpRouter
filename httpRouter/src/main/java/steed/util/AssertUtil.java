@@ -15,8 +15,11 @@ public class AssertUtil {
 	 * @param statusCode
 	 */
 	public static void assertTrue(boolean yourAssert, String message, int statusCode) {
+		assertTrue(yourAssert, message, statusCode, null);
+	}
+	public static void assertTrue(boolean yourAssert, String message, int statusCode,Object content) {
 		if (!yourAssert) {
-			throw new MessageRuntimeException(statusCode, message);
+			throw new MessageRuntimeException(new Message(statusCode, message, content));
 		}
 	}
 
