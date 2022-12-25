@@ -15,12 +15,23 @@ public interface ModelDriven<T> {
 	};
 
 	default Class<T> getModelClass() {
-		Type genericSuperclass = getClass().getGenericSuperclass();
-		if (!(genericSuperclass instanceof ParameterizedType)) {
+		Class<?> clazz = getClass();
+		Type genericSuperclass = clazz.getGenericSuperclass();
+		while (!(genericSuperclass instanceof ParameterizedType) && clazz != Object.class) {
+			clazz = clazz.getSuperclass();
+			genericSuperclass = clazz.getGenericSuperclass();
+		}
+		if (clazz == Object.class) {
 			return null;
 		}
-		ParameterizedType parameterizedType = (ParameterizedType) genericSuperclass;
-		Class<T> clazz = (Class<T>) (parameterizedType.getActualTypeArguments()[0]);
-		return clazz;
+//		if (!(genericSuperclass instanceof ParameterizedType)) {
+//			return null;
+//		}
+		try {
+			ParameterizedType parameterizedType = (ParameterizedType) genericSuperclass;
+			return (Class<T>) (parameterizedType.getActualTypeArguments()[0]);
+		} catch (ClassCastException e) {
+			return null;
+		}
 	}
 }

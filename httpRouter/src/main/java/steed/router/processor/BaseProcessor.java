@@ -13,6 +13,7 @@ import steed.ext.util.base.PathUtil;
 import steed.ext.util.base.StringUtil;
 import steed.ext.util.logging.Logger;
 import steed.ext.util.logging.LoggerFactory;
+import steed.hibernatemaster.util.DaoUtil;
 import steed.router.HttpRouter;
 import steed.router.RouterConfig;
 import steed.router.annotation.Path;
