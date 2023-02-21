@@ -8,6 +8,7 @@ import java.util.Map;
 
 import steed.ext.util.base.DomainUtil;
 import steed.ext.util.base.StringUtil;
+import steed.ext.util.reflect.ReflectResult;
 import steed.ext.util.reflect.ReflectUtil;
 import steed.hibernatemaster.domain.BaseDatabaseDomain;
 import steed.hibernatemaster.domain.BaseDomain;
@@ -114,15 +115,15 @@ public class BaseCRUDProcessor<SteedDomain extends BaseDatabaseDomain> extends M
 				if (StringUtil.isStringEmpty(requestParameter)) {
 					continue;
 				}
-				String fileName = nextElement.substring(0, nextElement.length()-selectIndex);
+				String fieldName = nextElement.substring(0, nextElement.length()-selectIndex);
 				String subName = nextElement.substring(nextElement.length()-selectIndex);
 				try {
-					Field declaredField = ReflectUtil.getDeclaredField(model.getClass(), fileName);
+					ReflectResult declaredField = ReflectUtil.getChainField(model.getClass(), fieldName);
 					//前端乱传字段名,日了哮天犬
 					if (declaredField == null) {
 						continue;
 					}
-					Class<?> type = declaredField.getType();
+					Class<?> type = declaredField.getField().getType();
 					if ("_not_null".equals(subName)) {
 						type = Boolean.class;
 					}
