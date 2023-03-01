@@ -221,7 +221,7 @@ public class BaseCRUDProcessor<SteedDomain extends BaseDatabaseDomain> extends M
 	 * 
 	 */
 	public String update(){
-		((BaseRelationalDatabaseDomain) getModel()).updateNotNullFieldByHql();
+		((BaseRelationalDatabaseDomain) getModel()).updateNotNullFieldByHql(null, true);
 		return null;
 	}
 	
