@@ -1,12 +1,19 @@
 package steed.router;
 
+import java.io.IOException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
+import javax.servlet.http.Part;
+
+import org.apache.catalina.connector.Request;
 
 public class XSSCleanRequestWrapper extends HttpServletRequestWrapper{
 	private boolean initedMap = false;
@@ -48,6 +55,25 @@ public class XSSCleanRequestWrapper extends HttpServletRequestWrapper{
 		initedMap = true;
 		return map;
 	}
+	
+//	private void config() {
+//		
+//	}
+//
+//	@Override
+//	public Collection<Part> getParts() throws IOException, ServletException {
+//		ServletRequest request = getRequest();
+//		if (request instanceof Request) {
+//			Request r = (Request) request;
+//		}
+//		return super.getParts();
+//	}
+//
+//	@Override
+//	public Part getPart(String name) throws IOException, ServletException {
+//		// TODO Auto-generated method stub
+//		return super.getPart(name);
+//	}
 
 	@Override
 	public String getParameter(String name) {

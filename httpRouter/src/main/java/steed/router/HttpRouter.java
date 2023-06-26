@@ -16,6 +16,9 @@ import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.catalina.connector.Request;
+import org.apache.catalina.connector.RequestFacade;
+
 import steed.ext.util.base.PathUtil;
 import steed.ext.util.base.StringUtil;
 import steed.ext.util.logging.Logger;
@@ -194,6 +197,9 @@ public abstract class HttpRouter{
 				logger.debug("请求url--->%s", request.getRequestURL());
 			}
 			try {
+				
+				dealMultipartNotWork(request);
+				
 				forwardNow(request, response);
 			} catch (IOException | ServletException e) {
 				logger.error("httpRouter分发请求出错!",e);
@@ -210,6 +216,18 @@ public abstract class HttpRouter{
 			responseThreadLocal.remove();
 		}
     }
+
+    /**
+     * 部分项目因为不是通过Servlet分发的http请求(filter分发,更灵活),导致springBoot的Multipart配置不生效
+     * @param request
+     */
+	private void dealMultipartNotWork(HttpServletRequest request) {
+		if (request instanceof RequestFacade) {
+			Request r = (Request) ReflectUtil.getValue("request", request);
+			r.getContext().setAllowCasualMultipartParsing(true);
+//					r.getWrapper().setMultipartConfigElement(new MultipartConfigElement(""));
+		}
+	}
     
     private void forwardNow(HttpServletRequest request, HttpServletResponse response) throws Exception{  
 		String requestURI = request.getRequestURI();
