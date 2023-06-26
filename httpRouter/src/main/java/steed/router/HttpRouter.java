@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.MultipartConfigElement;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletRequest;
@@ -189,6 +190,8 @@ public abstract class HttpRouter{
     
     public void forward(HttpServletRequest request, HttpServletResponse response){  
     	try {
+    		dealMultipartNotWork(request);
+    		
     		request = new XSSCleanRequestWrapper(request);
     		requestThreadLocal.set(request);
     		responseThreadLocal.set(response);
@@ -198,7 +201,6 @@ public abstract class HttpRouter{
 			}
 			try {
 				
-				dealMultipartNotWork(request);
 				
 				forwardNow(request, response);
 			} catch (IOException | ServletException e) {
@@ -225,7 +227,7 @@ public abstract class HttpRouter{
 		if (request instanceof RequestFacade) {
 			Request r = (Request) ReflectUtil.getValue("request", request);
 			r.getContext().setAllowCasualMultipartParsing(true);
-//					r.getWrapper().setMultipartConfigElement(new MultipartConfigElement(""));
+//			r.getWrapper().setMultipartConfigElement(new MultipartConfigElement(""));
 		}
 	}
     
