@@ -41,5 +41,20 @@ public interface RequestCryptor {
 	public default String encryptPayload(String payload, HttpServletRequest request, HttpServletResponse response) {
 		return payload;
 	}
+//	/**
+//	 *   多线程(多个http请求)操作可能会出错,所以每个请求都会new一个RequestCryptor,
+//	 *   如果该类兼容多线程的话,可以重写该方法,直接返回this,提升性能
+//	 * @param payload
+//	 * @param request
+//	 * @param response
+//	 * @return
+//	 */
+//	public default RequestCryptor newInstance() {
+//		try {
+//			return getClass().newInstance();
+//		} catch (Exception e) {
+//			throw new RuntimeException("自动创建实例失败,请参照文档重写steed.router.RequestCryptor.newInstance(String, HttpServletRequest, HttpServletResponse)方法", e);
+//		}
+//	}
 	
 }

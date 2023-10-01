@@ -200,8 +200,6 @@ public abstract class HttpRouter{
 				logger.debug("请求url--->%s", request.getRequestURL());
 			}
 			try {
-				
-				
 				forwardNow(request, response);
 			} catch (IOException | ServletException e) {
 				logger.error("httpRouter分发请求出错!",e);
