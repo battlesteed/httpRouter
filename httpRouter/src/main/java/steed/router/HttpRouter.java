@@ -123,7 +123,7 @@ public abstract class HttpRouter{
 	 */
 	protected void writeString(String string, HttpServletRequest request, HttpServletResponse response) throws IOException{
 		ServletOutputStream out = response.getOutputStream();
-		if (RouterConfig.requestCryptor != null) {
+		if (RouterConfig.requestCryptor != null && RouterConfig.requestCryptor.shouldIWork(request)) {
 			string = RouterConfig.requestCryptor.encryptPayload(string, request, response);
 		}
 		out.write(string.getBytes(RouterConfig.charset));
@@ -231,7 +231,7 @@ public abstract class HttpRouter{
     
     private void forwardNow(HttpServletRequest request, HttpServletResponse response) throws Exception{  
 		String requestURI = request.getRequestURI();
-		if (RouterConfig.requestCryptor != null) {
+		if (RouterConfig.requestCryptor != null && RouterConfig.requestCryptor.shouldIWork(request)) {
 			requestURI = RouterConfig.requestCryptor.decryptUrl(requestURI, request);
 			logger.debug("解密后真正请求的URI:" + requestURI);
 		}

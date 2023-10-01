@@ -35,7 +35,7 @@ public class XSSCleanRequestWrapper extends HttpServletRequestWrapper{
 				continue;
 			}
 			String[] value = tempMap.get(key);
-			if (RouterConfig.requestCryptor != null) {
+			if (RouterConfig.requestCryptor != null && RouterConfig.requestCryptor.shouldIWork((HttpServletRequest) getRequest())) {
 				RequestParamter decrypt = RouterConfig.requestCryptor.decryptParamter(key, value, this);
 				value = decrypt.getValue();
 				key = decrypt.getKey();

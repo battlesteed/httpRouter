@@ -30,6 +30,15 @@ public interface RequestCryptor {
 	public default String decryptUrl(String uri,HttpServletRequest request) {
 		return uri;
 	}
+	/**
+	 * 判断当前请求是否需要加解密,如:可以通过uri.contains("/api/")来只加密/api/*路径的请求
+	 * @param uri
+	 * @param request
+	 * @return
+	 */
+	public default boolean shouldIWork(HttpServletRequest request) {
+		return true;
+	}
 	
 	/**
 	 * 响应body加密(仅当返回body类型为json时才会调用该方法)
