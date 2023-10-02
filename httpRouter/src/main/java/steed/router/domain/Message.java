@@ -70,6 +70,21 @@ public class Message extends BaseDomain{
 		this.content = content;
 	}
 	
+	
+	public Message(String message, Integer statusCode, Object content) {
+		super();
+		this.statusCode = statusCode;
+		this.message = message;
+		this.content = content;
+	}
+	/**
+	 * 不推荐,经常传String content然后被编译器识别为调用{@link #Message(Integer, String, String)}了,
+	 * 用{@link #Message(String, Integer, Object)}
+	 * @param statusCode
+	 * @param message
+	 * @param content
+	 */
+	@Deprecated
 	public Message(Integer statusCode, String message, Object content) {
 		super();
 		this.statusCode = statusCode;
