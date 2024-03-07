@@ -144,7 +144,7 @@ public class SimpleXSSCleanner implements XSSCleaner{
 		if (allowSpecialCharacter) {
 			return cleanXss(target);
 		}else {
-			return StringUtil.transferrCharacter((target).replace("'", "＇"));
+			return StringUtil.transferrCharacter((target).replace("'", "＇").replace("\"", "“"));
 		}
 	}
 }

@@ -160,7 +160,8 @@ public class BaseCRUDProcessor<SteedDomain extends BaseDatabaseDomain> extends M
 	}
 	
 	protected SteedDomain getModelFromDatabase() {
-		return getModel().smartLoad();
+		return getModel().smartGet();
+//		return getModel().smartLoad();
 	}
 	
 	/**
