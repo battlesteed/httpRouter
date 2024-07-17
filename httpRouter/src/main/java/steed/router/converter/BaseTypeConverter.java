@@ -22,6 +22,11 @@ public class BaseTypeConverter implements ParamterConverter{
 		if (field.getType() == Boolean.class && StringUtil.isStringEmpty(request.getParameter(parameterName))) {
 			return null;
 		}
+		if (field.getType() == Boolean.class || field.getType() == boolean.class) {
+			 if("on".equals(request.getParameter(parameterName))){
+				 return true;
+			 }
+		}
 		return ReflectUtil.convertFromString(field.getType(), request.getParameter(parameterName));
 	}
 
